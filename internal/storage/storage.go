@@ -26,6 +26,8 @@ type Storage interface {
 	Configs(ctx context.Context, projectName, envName, releaseName string) ([]*Config, error)
 	Config(ctx context.Context, projectName, envName, releaseName, key string) (*Config, error)
 	UpsertConfigs(ctx context.Context, configs []*Config) error
+	MarkConfigUpdated(ctx context.Context, ID uint64) error
+	DeleteConfigs(ctx context.Context, IDs []uint64) error
 }
 
 // ValuesStorage ...

@@ -87,3 +87,25 @@ func (s *Storage) UpsertConfigs(ctx context.Context, configs []*storage.Config) 
 
 	return nil
 }
+
+// MarkConfigUpdated ...
+func (s *Storage) MarkConfigUpdated(ctx context.Context, ID uint64) error {
+	query := "UPDATE configs SET updated_at = NOW() WHERE id = $1"
+
+	if _, err := s.manager.Conn(ctx).Exec(ctx, query, ID); err != nil {
+		return fmt.Errorf("pool.Exec: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteConfigs ...
+func (s *Storage) DeleteConfigs(ctx context.Context, IDs []uint64) error {
+	query := "DELETE FROM configs WHERE id = ANY ($1)"
+
+	if _, err := s.manager.Conn(ctx).Exec(ctx, query, IDs); err != nil {
+		return fmt.Errorf("pool.Exec: %w", err)
+	}
+
+	return nil
+}
