@@ -80,7 +80,7 @@ func (p *Provider) WatchValue(ctx context.Context, key rtc.Key, handler rtc.Valu
 
 // Close ...
 func (p *Provider) Close() error {
-	return p.client.Close()
+	return p.client.Close() // nolint:wrapcheck
 }
 
 func (p *Provider) encodeKeyPath(key rtc.Key) string {

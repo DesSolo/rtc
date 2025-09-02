@@ -27,7 +27,7 @@ type Config struct {
 
 // NewConfigFromFile ...
 func NewConfigFromFile(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // nolint:gosec
 	if err != nil {
 		return nil, fmt.Errorf("os.ReadFile: %w", err)
 	}

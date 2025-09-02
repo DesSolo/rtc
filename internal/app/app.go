@@ -19,6 +19,7 @@ func (app *App) Run(ctx context.Context) error {
 
 	configureLogger(di)
 
+	// nolint:contextcheck
 	if err := di.Server().Run(ctx); err != nil {
 		return fmt.Errorf("failed to run server: %w", err)
 	}

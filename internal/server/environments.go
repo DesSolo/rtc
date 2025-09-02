@@ -30,5 +30,4 @@ func (s *Server) handleListEnvironments(w http.ResponseWriter, r *http.Request) 
 	respondData(ctx, w, http.StatusOK, listEnvironmentsResponse{
 		Environments: convertModelsToEnvironments(environments),
 	})
-
 }

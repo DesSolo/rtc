@@ -9,10 +9,11 @@ import (
 )
 
 var valueTypesValidators = map[models.ValueType]func(string) error{
-	models.ValueTypeUnknown: func(value string) error {
+	models.ValueTypeUnknown: func(_ string) error {
 		return errors.New("unknown value type")
 	},
-	models.ValueTypeString: func(value string) error {
+	models.ValueTypeString: func(_ string) error {
+		// sting value is always valid
 		return nil
 	},
 	models.ValueTypeBool: func(value string) error {

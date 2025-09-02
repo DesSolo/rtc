@@ -7,6 +7,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,32 +15,47 @@ import (
 	"rtc/internal/provider"
 )
 
+const (
+	defaultReadHeaderTimeout = time.Second * 3
+
+	defaultShutdownTimeout = time.Second * 5
+)
+
+// Server HTTP server
 type Server struct {
 	provider *provider.Provider
 
-	address string
-	mux     chi.Router
+	address           string
+	readHeaderTimeout time.Duration
+	mux               chi.Router
 }
 
+// NewServer ...
 func NewServer(provider *provider.Provider, address string) *Server {
 	return &Server{
-		provider: provider,
-		address:  address,
-		mux:      chi.NewRouter(),
+		provider:          provider,
+		address:           address,
+		readHeaderTimeout: defaultReadHeaderTimeout, // TODO: move to options
+		mux:               chi.NewRouter(),
 	}
 }
 
+// Run start HTTP server
 func (s *Server) Run(ctx context.Context) error {
 	s.initRoutes()
 
 	srv := &http.Server{
-		Addr:    s.address,
-		Handler: s.mux,
+		Addr:        s.address,
+		ReadTimeout: s.readHeaderTimeout,
+		Handler:     s.mux,
 	}
 
 	go func() {
 		<-ctx.Done()
-		if err := srv.Shutdown(context.Background()); err != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), defaultShutdownTimeout)
+		defer cancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
 			log.Printf("Failed to shutdown server: %v", err)
 		}
 	}()

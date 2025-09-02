@@ -36,7 +36,7 @@ func SetDefault(c rtc.Client) {
 
 // Value return a value with error
 func Value(ctx context.Context, key rtc.Key) (rtc.Value, error) {
-	return defaultClient.Value(ctx, key)
+	return defaultClient.Value(ctx, key) // nolint:wrapcheck
 }
 
 // Get return a value
@@ -52,5 +52,5 @@ func Get(ctx context.Context, key rtc.Key) rtc.Value {
 
 // WatchValue watch value changes
 func WatchValue(ctx context.Context, key rtc.Key, handler rtc.ValueChangeCallback) error {
-	return defaultClient.WatchValue(ctx, key, handler)
+	return defaultClient.WatchValue(ctx, key, handler) // nolint:wrapcheck
 }

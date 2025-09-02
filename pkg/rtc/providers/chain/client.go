@@ -3,6 +3,7 @@ package chain
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"rtc/pkg/rtc"
 )
@@ -39,7 +40,7 @@ func (c *Provider) WatchValue(ctx context.Context, key rtc.Key, handler rtc.Valu
 				continue
 			}
 
-			return err
+			return fmt.Errorf("client.WatchValue: %w", err)
 		}
 	}
 

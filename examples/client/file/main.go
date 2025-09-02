@@ -24,5 +24,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(val.String())
+	fmt.Println(val.String()) // nolint:forbidigo
 }

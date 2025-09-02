@@ -39,7 +39,7 @@ func (v *Value) Float64() float64 {
 
 // MaybeFloat64 ...
 func (v *Value) MaybeFloat64() (float64, error) {
-	return strconv.ParseFloat(v.String(), 64)
+	return strconv.ParseFloat(v.String(), 64) // nolint:wrapcheck
 }
 
 // Bool ...
@@ -50,7 +50,7 @@ func (v *Value) Bool() bool {
 
 // MaybeBool ...
 func (v *Value) MaybeBool() (bool, error) {
-	return strconv.ParseBool(v.String())
+	return strconv.ParseBool(v.String()) // nolint:wrapcheck
 }
 
 // Int ...
@@ -61,5 +61,5 @@ func (v *Value) Int() int {
 
 // MaybeInt ...
 func (v *Value) MaybeInt() (int, error) {
-	return strconv.Atoi(v.String())
+	return strconv.Atoi(v.String()) // nolint:wrapcheck
 }

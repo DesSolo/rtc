@@ -36,7 +36,11 @@ type Config struct {
 	UpdatedAt *time.Time
 }
 
+// ValuesStoragePath values path like foo/bar/baz
 type ValuesStoragePath string
+
+// ValuesStorageKey is a key in values storage
 type ValuesStorageKey string
 
+// ValuesStorageValue is a value in values storage
 type ValuesStorageValue []byte

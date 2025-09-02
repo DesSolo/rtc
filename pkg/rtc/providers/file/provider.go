@@ -78,7 +78,7 @@ func (p *Provider) WatchValue(_ context.Context, key rtc.Key, handler rtc.ValueC
 
 // Close ...
 func (p *Provider) Close() error {
-	return p.watcher.Close()
+	return p.watcher.Close() // nolint:wrapcheck
 }
 
 func (p *Provider) read() error {

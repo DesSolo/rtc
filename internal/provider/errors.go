@@ -3,7 +3,12 @@ package provider
 import "errors"
 
 var (
-	ErrNotFound      = errors.New("not found")
+	// ErrNotFound not found entity
+	ErrNotFound = errors.New("not found")
+
+	// ErrAlreadyExists entity is already exist
 	ErrAlreadyExists = errors.New("already exists")
-	ErrNotValid      = errors.New("not valid")
+
+	// ErrNotValid validation error
+	ErrNotValid = errors.New("not valid")
 )
