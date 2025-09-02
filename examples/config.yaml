@@ -1,13 +1,26 @@
+# logging settings block
 logging:
+  # log level
+  #   Debug = -4
+  #   Info = 0
+  #	  Warn = 4
+  #	  Error = 8
   level: -4
 
+# server settings block
 server:
+  # listen address and port
   address: ":8080"
 
+# storage settings block
 storage:
+  # postgres connection dsn
   dsn: postgres://postgres:postgres@127.0.0.1:5432/rtc?sslmode=disable
 
+# values storage settings block
 values_storage:
+  # etcd endpoints
   endpoints:
     - 127.0.0.1:2379
+  # dial timeout
   dial_timeout: 3s
