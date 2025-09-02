@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:13.22-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rtc
+    ports:
+      - "5432:5432"
+
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.14
+    container_name: etcd-single-node
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd-node1
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://0.0.0.0:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=etcd-node1=http://0.0.0.0:2380
+      - --initial-cluster-token=etcd-cluster-1
+      - --initial-cluster-state=new

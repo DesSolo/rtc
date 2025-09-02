@@ -1,0 +1,13 @@
+logging:
+  level: -4
+
+server:
+  address: ":8080"
+
+storage:
+  dsn: postgres://postgres:postgres@127.0.0.1:5432/rtc?sslmode=disable
+
+values_storage:
+  endpoints:
+    - 127.0.0.1:2379
+  dial_timeout: 3s

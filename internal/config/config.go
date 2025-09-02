@@ -1,0 +1,41 @@
+package config
+
+import (
+	"fmt"
+	"os"
+	"time"
+
+	"gopkg.in/yaml.v3"
+)
+
+// Config ...
+type Config struct {
+	Logging struct {
+		Level int `yaml:"level"`
+	} `yaml:"logging"`
+	Server struct {
+		Address string `yaml:"address"`
+	} `yaml:"server"`
+	Storage struct {
+		DSN string `yaml:"dsn"`
+	} `yaml:"storage"`
+	ValuesStorage struct {
+		Endpoints   []string      `yaml:"endpoints"`
+		DialTimeout time.Duration `yaml:"dial_timeout"`
+	} `yaml:"values_storage"`
+}
+
+// NewConfigFromFile ...
+func NewConfigFromFile(path string) (*Config, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("os.ReadFile: %w", err)
+	}
+
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("yaml.Unmarshal: %w", err)
+	}
+
+	return &config, nil
+}
