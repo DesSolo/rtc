@@ -83,3 +83,17 @@ func convertConfigsToModels(configs []config) []*models.Config {
 
 	return result
 }
+
+func convertModelsToAudits(audits []*models.Audit) []audit {
+	result := make([]audit, 0, len(audits))
+	for _, modelAudit := range audits {
+		result = append(result, audit{
+			Action:  string(modelAudit.Action),
+			Actor:   modelAudit.Actor,
+			Payload: modelAudit.Payload,
+			Ts:      modelAudit.Ts,
+		})
+	}
+
+	return result
+}

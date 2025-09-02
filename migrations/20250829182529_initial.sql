@@ -55,8 +55,8 @@ CREATE TABLE configs (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE if exist projects;
-DROP TABLE if exist environments;
-DROP TABLE if exist releases;
-DROP TABLE if exist configs;
+DROP TABLE IF EXIST projects;
+DROP TABLE IF EXIST environments;
+DROP TABLE IF EXIST releases;
+DROP TABLE IF EXIST configs;
 -- +goose StatementEnd

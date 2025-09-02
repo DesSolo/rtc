@@ -23,3 +23,13 @@ func ConvertValueTypeToModel(valueType string) ValueType {
 		return ValueTypeUnknown
 	}
 }
+
+// ConvertAuditActionToModel ...
+func ConvertAuditActionToModel(auditAction string) AuditAction {
+	switch auditAction {
+	case "config_updated":
+		return AuditActionConfigUpdated
+	default:
+		return AuditActionUnknown
+	}
+}

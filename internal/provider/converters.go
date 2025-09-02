@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -106,46 +105,16 @@ func convertModelsToConfigs(configs []*models.Config, releaseID uint64) []*stora
 	return storageConfigs
 }
 
-type metadataV1 struct {
-	Version  string `json:"version"`
-	Group    string `json:"group"`
-	Usage    string `json:"usage"`
-	Writable bool   `json:"writable"`
-	View     struct {
-		Enum string `json:"enum"`
-	} `json:"view"`
-}
-
-func decodeMetadata(metadata []byte) (models.ConfigMetadata, error) {
-	var meta metadataV1
-	if err := json.Unmarshal(metadata, &meta); err != nil {
-		return models.ConfigMetadata{}, fmt.Errorf("json.Unmarshal: %w", err)
+func convertAuditsToModels(audits []*storage.Audit) []*models.Audit {
+	result := make([]*models.Audit, 0, len(audits))
+	for _, audit := range audits {
+		result = append(result, &models.Audit{
+			Action:  models.ConvertAuditActionToModel(audit.Action),
+			Actor:   audit.Actor,
+			Payload: audit.Payload,
+			Ts:      audit.Ts,
+		})
 	}
 
-	return models.ConfigMetadata{
-		Group:    meta.Group,
-		Usage:    meta.Usage,
-		Writable: meta.Writable,
-		View: models.ConfigMetadataView{
-			Enum: meta.View.Enum,
-		},
-	}, nil
-}
-
-func encodeMetadata(metadata models.ConfigMetadata) ([]byte, error) {
-	meta := metadataV1{
-		Version:  "v1",
-		Group:    metadata.Group,
-		Usage:    metadata.Usage,
-		Writable: metadata.Writable,
-	}
-
-	meta.View.Enum = metadata.View.Enum
-
-	data, err := json.Marshal(meta)
-	if err != nil {
-		return nil, fmt.Errorf("json.Marshal: %w", err)
-	}
-
-	return data, nil
+	return result
 }

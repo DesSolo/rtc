@@ -67,3 +67,18 @@ type Release struct {
 	Name      string
 	CreatedAt time.Time
 }
+
+type AuditAction string
+
+const (
+	AuditActionUnknown       AuditAction = ""
+	AuditActionConfigUpdated AuditAction = "config_updated"
+)
+
+// Audit log record for history
+type Audit struct {
+	Action  AuditAction
+	Actor   string
+	Payload []byte
+	Ts      time.Time
+}

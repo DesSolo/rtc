@@ -90,5 +90,7 @@ func (s *Server) initRoutes() {
 		r.Get("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleListConfigs)
 		r.Put("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleSetConfigValue)
 		r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
+
+		r.Get("/audits", s.handleListAudits)
 	})
 }

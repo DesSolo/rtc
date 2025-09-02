@@ -58,6 +58,12 @@ func (p *Provider) SetConfigValue(ctx context.Context, projectName, envName, rel
 		return fmt.Errorf("validateNewValue: %w", err)
 	}
 
+	// TODO: username from context
+	auditRecord, err := encodeAuditRecordConfigUpdated("", key, string(actualValue), string(value))
+	if err != nil {
+		return fmt.Errorf("encodeAuditRecordConfigUpdated: %w", err)
+	}
+
 	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := p.valuesStorage.SetValue(ctx, valuesStorageKey, value); err != nil {
 			return fmt.Errorf("valuesStorage.SetValue: %w", err)
@@ -65,6 +71,10 @@ func (p *Provider) SetConfigValue(ctx context.Context, projectName, envName, rel
 
 		if err := p.storage.MarkConfigUpdated(ctx, configStorage.ID); err != nil {
 			return fmt.Errorf("storage.MarkConfigUpdated: %w", err)
+		}
+
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.CreateAudit: %w", err)
 		}
 
 		return nil

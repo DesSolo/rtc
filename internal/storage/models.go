@@ -36,6 +36,15 @@ type Config struct {
 	UpdatedAt *time.Time
 }
 
+// Audit ...
+type Audit struct {
+	ID      uint64
+	Action  string
+	Actor   string
+	Payload []byte
+	Ts      time.Time
+}
+
 // ValuesStoragePath values path like foo/bar/baz
 type ValuesStoragePath string
 

@@ -28,6 +28,9 @@ type Storage interface {
 	UpsertConfigs(ctx context.Context, configs []*Config) error
 	MarkConfigUpdated(ctx context.Context, ID uint64) error
 	DeleteConfigs(ctx context.Context, IDs []uint64) error
+
+	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
+	AddAuditRecord(ctx context.Context, audit *Audit) error
 }
 
 // ValuesStorage ...
