@@ -14,7 +14,8 @@ type Config struct {
 		Level int `yaml:"level"`
 	} `yaml:"logging"`
 	Server struct {
-		Address string `yaml:"address"`
+		Address           string        `yaml:"address"`
+		ReadHeaderTimeout time.Duration `yaml:"read_header_timeout"`
 	} `yaml:"server"`
 	Storage struct {
 		DSN string `yaml:"dsn"`
@@ -22,6 +23,7 @@ type Config struct {
 	ValuesStorage struct {
 		Endpoints   []string      `yaml:"endpoints"`
 		DialTimeout time.Duration `yaml:"dial_timeout"`
+		Path        string        `yaml:"path"`
 	} `yaml:"values_storage"`
 }
 

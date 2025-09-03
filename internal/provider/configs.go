@@ -84,8 +84,6 @@ func (p *Provider) SetConfigValue(ctx context.Context, projectName, envName, rel
 		return fmt.Errorf("storage.WithTransaction: %w", txErr)
 	}
 
-	// TODO: add to audit_log
-
 	return nil
 }
 

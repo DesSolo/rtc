@@ -16,9 +16,10 @@ import (
 )
 
 const (
+	defaultAddress           = ":8080"
 	defaultReadHeaderTimeout = time.Second * 3
 
-	defaultShutdownTimeout = time.Second * 5
+	shutdownTimeout = time.Second * 5
 )
 
 // Server HTTP server
@@ -31,13 +32,19 @@ type Server struct {
 }
 
 // NewServer ...
-func NewServer(provider *provider.Provider, address string) *Server {
-	return &Server{
+func NewServer(provider *provider.Provider, options ...OptionFunc) *Server {
+	s := &Server{
 		provider:          provider,
-		address:           address,
-		readHeaderTimeout: defaultReadHeaderTimeout, // TODO: move to options
+		address:           defaultAddress,
+		readHeaderTimeout: defaultReadHeaderTimeout,
 		mux:               chi.NewRouter(),
 	}
+
+	for _, option := range options {
+		option(s)
+	}
+
+	return s
 }
 
 // Run start HTTP server
@@ -52,7 +59,7 @@ func (s *Server) Run(ctx context.Context) error {
 
 	go func() {
 		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), defaultShutdownTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
 		defer cancel()
 
 		if err := srv.Shutdown(shutdownCtx); err != nil {

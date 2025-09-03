@@ -104,7 +104,7 @@ func (c *container) ValuesStorage() storage.ValuesStorage {
 
 		closer.Add(client.Close)
 
-		c.valuesStorage = etcd.NewValuesStorage(client)
+		c.valuesStorage = etcd.NewValuesStorage(client, etcd.WithPath(options.Path))
 	}
 
 	return c.valuesStorage
@@ -122,7 +122,10 @@ func (c *container) Server() *server.Server {
 	if c.server == nil {
 		options := c.Config().Server
 
-		c.server = server.NewServer(c.Provider(), options.Address)
+		c.server = server.NewServer(c.Provider(),
+			server.WithAddress(options.Address),
+			server.WithReadHeaderTimeout(options.ReadHeaderTimeout),
+		)
 	}
 
 	return c.server

@@ -21,8 +21,14 @@ type ValuesStorage struct {
 }
 
 // NewValuesStorage ...
-func NewValuesStorage(client *clientv3.Client) *ValuesStorage {
-	return &ValuesStorage{client: client, path: defaultPath} // TODO: mode to options
+func NewValuesStorage(client *clientv3.Client, options ...OptionFunc) *ValuesStorage {
+	s := &ValuesStorage{client: client, path: defaultPath}
+
+	for _, option := range options {
+		option(s)
+	}
+
+	return s
 }
 
 // Values ...

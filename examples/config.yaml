@@ -11,6 +11,8 @@ logging:
 server:
   # listen address and port
   address: ":8080"
+  # timeout for read header
+  read_header_timeout: 3s
 
 # storage settings block
 storage:
@@ -24,3 +26,5 @@ values_storage:
     - 127.0.0.1:2379
   # dial timeout
   dial_timeout: 3s
+  # specific path (root)
+  path: rtc
