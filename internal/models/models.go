@@ -68,10 +68,13 @@ type Release struct {
 	CreatedAt time.Time
 }
 
+// AuditAction ...
 type AuditAction string
 
 const (
-	AuditActionUnknown       AuditAction = ""
+	// AuditActionUnknown ...
+	AuditActionUnknown AuditAction = ""
+	// AuditActionConfigUpdated ...
 	AuditActionConfigUpdated AuditAction = "config_updated"
 )
 

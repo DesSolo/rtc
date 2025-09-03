@@ -42,5 +42,4 @@ func (s *Server) handleListAudits(w http.ResponseWriter, r *http.Request) {
 	respondData(ctx, w, http.StatusOK, listAuditsResponse{
 		Audits: convertModelsToAudits(audits),
 	})
-
 }
