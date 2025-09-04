@@ -11,6 +11,7 @@ type Storage interface {
 	WithTransaction(ctx context.Context, f func(ctx context.Context) error) error
 
 	Projects(ctx context.Context, limit, offset int) ([]*Project, error)
+	SearchProjects(ctx context.Context, query string, limit int) ([]*Project, error)
 	ProjectByName(ctx context.Context, name string) (*Project, error)
 	CreateProject(ctx context.Context, project *Project) error
 

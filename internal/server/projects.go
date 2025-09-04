@@ -23,10 +23,11 @@ type listProjectsResponse struct {
 func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	q := r.URL.Query().Get("q")
 	limit := queryOr(r, "limit", 10)
 	offset := queryOr(r, "offset", 0)
 
-	projects, err := s.provider.Projects(ctx, limit, offset)
+	projects, err := s.provider.Projects(ctx, q, limit, offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "provider.Projects", "err", err)
 		respondError(ctx, w, http.StatusInternalServerError, err.Error())
