@@ -83,12 +83,19 @@ func validateNewValue(config *models.Config, newValue []byte) error {
 	return nil
 }
 
-func validateUpsert(config *models.Config) error {
-	if err := validateByValueType(config.ValueType, config.Value); err != nil {
-		return fmt.Errorf("%w: value type: %w", ErrNotValid, err)
+func validateUpsert(configs []*models.Config) error {
+	// etcd maximum items in one transaction
+	if len(configs) > 499 {
+		return fmt.Errorf("%w: to many configs", ErrNotValid)
 	}
 
-	// TODO: view validate
+	for _, config := range configs {
+		if err := validateByValueType(config.ValueType, config.Value); err != nil {
+			return fmt.Errorf("%w: value type: %w", ErrNotValid, err)
+		}
+
+		// TODO: view validate
+	}
 
 	return nil
 }

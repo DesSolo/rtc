@@ -98,10 +98,8 @@ func (p *Provider) UpsertConfigs(ctx context.Context, projectName, envName, rele
 		return fmt.Errorf("storage.ProjectByName: %w", err)
 	}
 
-	for _, config := range configs {
-		if err := validateUpsert(config); err != nil {
-			return fmt.Errorf("key %q validateUpsert: %w", config.Key, err)
-		}
+	if err := validateUpsert(configs); err != nil {
+		return fmt.Errorf("validateUpsert: %w", err)
 	}
 
 	newValuesStorageItems, err := p.resolveNewValuesStorageItems(ctx, configs, projectName, envName, releaseName)
