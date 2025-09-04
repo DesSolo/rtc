@@ -1,5 +1,4 @@
 import { Layout, Menu } from "antd";
-
 import {
   ProjectOutlined,
   AuditOutlined
@@ -7,10 +6,9 @@ import {
 
 const { Sider } = Layout;
 
-const Nav = () => {
+const NavBar = ({collapsed}) => {
     return (
-        <Sider trigger={null} collapsible> // TODO: add collapse
-        <div className="demo-logo-vertical" />
+        <Sider trigger={null} collapsible collapsed={collapsed}>
         <Menu
           theme="dark"
           mode="inline"
@@ -32,4 +30,4 @@ const Nav = () => {
     )
 };
 
-export default Nav;
+export default NavBar;
