@@ -54,6 +54,7 @@ func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, re
 	}
 
 	newValuesStorageItems := make(storage.ValuesStorageKV, len(actualValues))
+	auditLogItems := make([]*auditRecordConfigUpdatedItems, 0, len(actualValues))
 
 	for _, config := range convertConfigsToModel(configsFromStorage, actualValues) {
 		newValue, ok := kv[config.Key]
@@ -68,6 +69,12 @@ func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, re
 		valuesStorageKey := formatValuesStorageKey(projectName, envName, releaseName, config.Key)
 
 		newValuesStorageItems[valuesStorageKey] = newValue
+
+		auditLogItems = append(auditLogItems, &auditRecordConfigUpdatedItems{
+			Key:      config.Key,
+			OldValue: string(config.Value),
+			NewValue: string(newValue),
+		})
 	}
 
 	updatedStorageConfigIDs := make([]uint64, 0, len(configsFromStorage))
@@ -76,10 +83,15 @@ func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, re
 	}
 
 	// TODO: username from context
-	//auditRecord, err := encodeAuditRecordConfigUpdated("", key, string(actualValue), string(value))
-	//if err != nil {
-	//	return fmt.Errorf("encodeAuditRecordConfigUpdated: %w", err)
-	//}
+	auditRecord, err := encodeAuditRecordConfigUpdated("", &auditRecordConfigUpdated{
+		ProjectName:     projectName,
+		EnvironmentName: envName,
+		ReleaseName:     releaseName,
+		Items:           auditLogItems,
+	})
+	if err != nil {
+		return fmt.Errorf("encodeAuditRecordConfigUpdated: %w", err)
+	}
 
 	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := p.valuesStorage.SetValues(ctx, newValuesStorageItems); err != nil {
@@ -90,9 +102,9 @@ func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, re
 			return fmt.Errorf("storage.MarkConfigUpdated: %w", err)
 		}
 
-		//if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
-		//	return fmt.Errorf("storage.CreateAudit: %w", err)
-		//}
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.AddAuditRecord: %w", err)
+		}
 
 		return nil
 	})
@@ -119,27 +131,27 @@ func (p *Provider) UpsertConfigs(ctx context.Context, projectName, envName, rele
 		return fmt.Errorf("validateUpsert: %w", err)
 	}
 
+	environment, err := storage.GetOrCreateEnvironment(ctx, p.storage, project.ID, envName)
+	if err != nil {
+		return fmt.Errorf("storage.GetOrCreateEnvironment: %w", err)
+	}
+
+	release, err := storage.GetOrCreateRelease(ctx, p.storage, environment.ID, releaseName)
+	if err != nil {
+		return fmt.Errorf("storage.GetOrCreateRelease: %w", err)
+	}
+
 	newValuesStorageItems, err := p.resolveNewValuesStorageItems(ctx, configs, projectName, envName, releaseName)
 	if err != nil {
 		return fmt.Errorf("resolveNewValuesStorageItems: %w", err)
 	}
 
-	toDeleteConfigsIDs, err := p.resolveToDeleteConfigsIDs(ctx, configs, projectName, envName, releaseName)
+	toDelete, err := p.resolveToDeleteConfigs(ctx, configs, projectName, envName, releaseName)
 	if err != nil {
 		return fmt.Errorf("resolveToDeleteConfigsIDs: %w", err)
 	}
 
 	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
-		environment, err := storage.GetOrCreateEnvironment(ctx, p.storage, project.ID, envName)
-		if err != nil {
-			return fmt.Errorf("storage.GetOrCreateEnvironment: %w", err)
-		}
-
-		release, err := storage.GetOrCreateRelease(ctx, p.storage, environment.ID, releaseName)
-		if err != nil {
-			return fmt.Errorf("storage.GetOrCreateRelease: %w", err)
-		}
-
 		if len(newValuesStorageItems) != 0 {
 			if err := p.valuesStorage.SetValues(ctx, newValuesStorageItems); err != nil {
 				return fmt.Errorf("valuesStorage.SetValues: %w", err)
@@ -150,8 +162,14 @@ func (p *Provider) UpsertConfigs(ctx context.Context, projectName, envName, rele
 			return fmt.Errorf("storage.UpsertConfigs: %w", err)
 		}
 
-		if len(toDeleteConfigsIDs) != 0 {
-			if err := p.storage.DeleteConfigs(ctx, toDeleteConfigsIDs); err != nil {
+		if len(toDelete.valuesStorageKeys) != 0 {
+			if err := p.valuesStorage.DeleteValues(ctx, toDelete.valuesStorageKeys); err != nil {
+				return fmt.Errorf("valuesStorage.DeleteValues: %w", err)
+			}
+		}
+
+		if len(toDelete.ids) != 0 {
+			if err := p.storage.DeleteConfigs(ctx, toDelete.ids); err != nil {
 				return fmt.Errorf("storage.DeleteConfigs: %w", err)
 			}
 		}
@@ -196,7 +214,12 @@ func (p *Provider) resolveNewValuesStorageItems(ctx context.Context, configs []*
 	return newKeys, nil
 }
 
-func (p *Provider) resolveToDeleteConfigsIDs(ctx context.Context, configs []*models.Config, projectName, envName, releaseName string) ([]uint64, error) {
+type toDeleteConfigs struct {
+	ids               []uint64
+	valuesStorageKeys []storage.ValuesStorageKey
+}
+
+func (p *Provider) resolveToDeleteConfigs(ctx context.Context, configs []*models.Config, projectName, envName, releaseName string) (*toDeleteConfigs, error) {
 	newKeys := make(map[string]struct{}, len(configs))
 	for _, config := range configs {
 		newKeys[config.Key] = struct{}{}
@@ -207,15 +230,16 @@ func (p *Provider) resolveToDeleteConfigsIDs(ctx context.Context, configs []*mod
 		return nil, fmt.Errorf("storage.Configs: %w", err)
 	}
 
-	var toDeleteConfigsIDs []uint64
+	var toDelete toDeleteConfigs
 
 	for _, actualConfig := range allActualConfigs {
 		if _, ok := newKeys[actualConfig.Key]; !ok {
-			toDeleteConfigsIDs = append(toDeleteConfigsIDs, actualConfig.ID)
+			toDelete.ids = append(toDelete.ids, actualConfig.ID)
+			toDelete.valuesStorageKeys = append(toDelete.valuesStorageKeys, formatValuesStorageKey(projectName, envName, releaseName, actualConfig.Key))
 		}
 	}
 
-	return toDeleteConfigsIDs, nil
+	return &toDelete, nil
 }
 
 func formatValuesStoragePath(projectName, envName, releaseName string) storage.ValuesStoragePath {

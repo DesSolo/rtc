@@ -1,66 +1,92 @@
-import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import {useCallback, useEffect, useState} from "react";
+import {useNavigate, useOutletContext} from "react-router-dom";
 import EnvironmentsSelector from "../Environments/Selector.jsx";
-import { Table, Typography } from "antd";
+import { Button, Table, Flex, Popconfirm, notification } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 
-const {Link} = Typography
-
-
-const ReleasesList = ({project}) => {
+const ReleasesList = ({ project }) => {
+    const { setTitle } = useOutletContext();
     const navigate = useNavigate();
     const [env, setEnv] = useState();
     const [releases, setReleases] = useState([]);
+    const [api, contextHolder] = notification.useNotification();
+
+    useEffect(() => {
+        setTitle(`Releases: ${project}`)
+    }, []);
+
+    const fetchReleases = useCallback(async (environment) => {
+        try {
+            const resp = await fetch(`/api/v1/projects/${project}/envs/${environment}/releases`);
+            if (!resp.ok) throw new Error(`status ${resp.status}`);
+            const data = await resp.json();
+            setReleases(data.data?.releases || []);
+        } catch (err) {
+            api.error({ message: "Failed to load releases", description: String(err) });
+        }
+    }, [project, api]);
+
+    const deleteRelease = useCallback(async (name) => {
+        try {
+            const resp = await fetch(`/api/v1/projects/${project}/envs/${env}/releases/${name}`, {
+                method: "DELETE",
+            });
+            if (!resp.ok) throw new Error(`status ${resp.status}`);
+            api.success({ message: `Release ${name} deleted` });
+            fetchReleases(env);
+        } catch (err) {
+            api.error({ message: "Failed to delete release", description: String(err) });
+        }
+    }, [env, project, fetchReleases, api]);
+
+    const handleEnvChanged = (environment) => {
+        setEnv(environment);
+        fetchReleases(environment);
+    };
+
+    const handleClick = (release) => {
+        navigate(`/projects/${project}/envs/${env}/releases/${release}/configs`);
+    };
 
     const columns = [
         {
             title: "Name",
             dataIndex: "name",
             key: "name",
+            render: (text) => (
+                <a onClick={() => handleClick(text)}>{text}</a>
+            ),
         },
         {
             title: "Created",
             dataIndex: "created_at",
             key: "created",
-            render: (text) => (
-                <>
-                    {new Date(text).toLocaleString()}
-                </>
-            )
+            render: (text) => new Date(text).toLocaleString(),
         },
         {
             title: "Actions",
             key: "actions",
             render: (release) => (
-                <>
-                    <Link onClick={() => handleClick(release.name)}>conf</Link>
-                </>
-            )
-        }
-    ]
-
-    const fetchRelease = (env) => {
-        fetch(`/api/v1/projects/${project}/envs/${env}/releases`)
-            .then((response) => {
-                if (!response.ok) throw new Error("err");
-                return response.json();
-            })
-            .then((data) => {
-                setReleases(data.data.releases)
-            })
-    }
-
-    const handleEnvChanged = (env) => {
-        fetchRelease(env)
-        setEnv(env)
-    }
-
-    const handleClick = (release) => {
-        navigate(`/projects/${project}/envs/${env}/releases/${release}/configs`)
-    }
+                <Flex gap="middle">
+                    <Popconfirm
+                        title={`Delete release ${release.name}?`}
+                        onConfirm={() => deleteRelease(release.name)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button danger type="primary" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </Flex>
+            ),
+        },
+    ];
 
     return (
         <>
-            <EnvironmentsSelector project={project} onEnvChange={(selectedEnv) => (handleEnvChanged(selectedEnv)) }/>
+            {contextHolder}
+            <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <EnvironmentsSelector project={project} onEnvChange={handleEnvChanged} />
+            </div>
             <Table
                 columns={columns}
                 dataSource={releases}
@@ -68,7 +94,7 @@ const ReleasesList = ({project}) => {
                 pagination={false}
             />
         </>
-    )
-}
+    );
+};
 
 export default ReleasesList;

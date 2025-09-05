@@ -44,7 +44,7 @@ func (p *Provider) DeleteRelease(ctx context.Context, projectName, envName, rele
 			return fmt.Errorf("storage.DeleteRelease: %w", err)
 		}
 
-		if err := p.valuesStorage.DeleteValues(ctx, formatValuesStoragePath(projectName, envName, releaseName)); err != nil {
+		if err := p.valuesStorage.DeleteValuesByPath(ctx, formatValuesStoragePath(projectName, envName, releaseName)); err != nil {
 			return fmt.Errorf("storage.DeleteValues: %w", err)
 		}
 

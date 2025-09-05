@@ -8,12 +8,13 @@ const { Header, Content } = Layout;
 
 export const LayoutWithNav = () => {
     const [collapsed, setCollapsed] = useState(false);
+    const [title, setTitle] = useState('')
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
     return (
-        <Layout>
+        <Layout style={{ minHeight: '100vh' }}>
             <NavBar collapsed={collapsed} />
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
@@ -27,6 +28,9 @@ export const LayoutWithNav = () => {
                             height: 64,
                         }}
                     />
+                    <span style={{ marginLeft: 16, fontSize: '18px', fontWeight: 'bold' }}>
+                        {title}
+                    </span>
                 </Header>
                 <Content
                     style={{
@@ -37,7 +41,7 @@ export const LayoutWithNav = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <Outlet />
+                    <Outlet context={{ setTitle }} />
                 </Content>
             </Layout>
         </Layout>

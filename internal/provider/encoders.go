@@ -52,19 +52,49 @@ func encodeMetadata(metadata models.ConfigMetadata) ([]byte, error) {
 	return data, nil
 }
 
-func encodeAuditRecordConfigUpdated(actor, key, oldValue, newValue string) (*storage.Audit, error) {
-	type payloadV1 struct {
-		Version  string `json:"version"`
+type auditRecordConfigUpdated struct {
+	ProjectName     string
+	EnvironmentName string
+	ReleaseName     string
+	Items           []*auditRecordConfigUpdatedItems
+}
+
+type auditRecordConfigUpdatedItems struct {
+	Key      string
+	OldValue string
+	NewValue string
+}
+
+func encodeAuditRecordConfigUpdated(actor string, record *auditRecordConfigUpdated) (*storage.Audit, error) {
+	type payloadV1Items struct {
 		Key      string `json:"key"`
 		OldValue string `json:"old_value"`
 		NewValue string `json:"new_value"`
 	}
 
+	type payloadV1 struct {
+		Version     string           `json:"version"`
+		Project     string           `json:"project"`
+		Environment string           `json:"environment"`
+		Release     string           `json:"release"`
+		Items       []payloadV1Items `json:"items"`
+	}
+
+	items := make([]payloadV1Items, 0, len(record.Items))
+	for _, item := range record.Items {
+		items = append(items, payloadV1Items{
+			Key:      item.Key,
+			OldValue: item.OldValue,
+			NewValue: item.NewValue,
+		})
+	}
+
 	data, err := json.Marshal(payloadV1{
-		Version:  "v1",
-		Key:      key,
-		OldValue: oldValue,
-		NewValue: newValue,
+		Version:     "v1",
+		Project:     record.ProjectName,
+		Environment: record.EnvironmentName,
+		Release:     record.ReleaseName,
+		Items:       items,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("json.Marshal: %w", err)

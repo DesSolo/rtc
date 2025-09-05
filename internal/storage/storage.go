@@ -40,5 +40,6 @@ type ValuesStorage interface {
 	Values(ctx context.Context, keys []ValuesStorageKey) (ValuesStorageKV, error)
 	ValuesByPath(ctx context.Context, path ValuesStoragePath) (ValuesStorageKV, error)
 	SetValues(ctx context.Context, values ValuesStorageKV) error
-	DeleteValues(ctx context.Context, path ValuesStoragePath) error
+	DeleteValues(ctx context.Context, keys []ValuesStorageKey) error
+	DeleteValuesByPath(ctx context.Context, path ValuesStoragePath) error
 }

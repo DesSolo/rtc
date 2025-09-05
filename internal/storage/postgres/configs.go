@@ -18,6 +18,7 @@ func (s *Storage) Configs(ctx context.Context, projectName, envName, releaseName
 		JOIN environments e ON e.id = r.environment_id
 		JOIN projects p ON p.id = e.project_id
 		WHERE p.name = $1 AND e.name = $2 AND r.name = $3
+		ORDER BY c.id ASC
 	`
 
 	rows, err := s.manager.Conn(ctx).Query(ctx, query, projectName, envName, releaseName)
@@ -48,6 +49,7 @@ func (s *Storage) ConfigsByKeys(ctx context.Context, projectName, envName, relea
 		JOIN environments e ON e.id = r.environment_id
 		JOIN projects p ON p.id = e.project_id
 		WHERE p.name = $1 AND e.name = $2 AND r.name = $3 AND c.key = ANY ($4)
+		ORDER BY c.id ASC
 	`
 
 	rows, err := s.manager.Conn(ctx).Query(ctx, query, projectName, envName, releaseName, keys)

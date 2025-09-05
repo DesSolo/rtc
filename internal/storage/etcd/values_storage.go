@@ -72,53 +72,35 @@ func (s *ValuesStorage) ValuesByPath(ctx context.Context, path storage.ValuesSto
 	return values, nil
 }
 
-// Value ...
-func (s *ValuesStorage) Value(ctx context.Context, key storage.ValuesStorageKey) (storage.ValuesStorageValue, error) {
-	resp, err := s.client.Get(ctx, s.formatPath(string(key)))
-	if err != nil {
-		return nil, fmt.Errorf("client.Get: %w", err)
-	}
-
-	if len(resp.Kvs) != 1 {
-		return nil, storage.ErrNotFound
-	}
-
-	return resp.Kvs[0].Value, nil
-}
-
-// SetValue ...
-func (s *ValuesStorage) SetValue(ctx context.Context, key storage.ValuesStorageKey, value storage.ValuesStorageValue) error {
-	if _, err := s.client.Put(ctx, s.formatPath(string(key)), string(value)); err != nil {
-		return fmt.Errorf("client.Put: %w", err)
-	}
-
-	return nil
-}
-
 // SetValues ...
 func (s *ValuesStorage) SetValues(ctx context.Context, values storage.ValuesStorageKV) error {
+	ops := make([]clientv3.Op, 0, len(values))
 	for key, value := range values {
-		if err := s.SetValue(ctx, key, value); err != nil {
-			return err
-		}
+		ops = append(ops, clientv3.OpPut(s.formatPath(string(key)), string(value)))
+	}
+
+	if _, err := s.client.Txn(ctx).Then(ops...).Commit(); err != nil {
+		return fmt.Errorf("txn.Commit: %w", err)
 	}
 
 	return nil
-	//ops := make([]clientv3.Op, 0, len(values))
-	//for key, value := range values {
-	//	ops = append(ops, clientv3.OpPut(s.formatPath(string(key)), string(value)))
-	//}
-	//
-	//txn := s.client.Txn(ctx)
-	//if _, err := txn.Then(ops...).Commit(); err != nil {
-	//	return fmt.Errorf("txn.Commit: %w", err)
-	//}
-	//
-	//return nil
 }
 
 // DeleteValues ...
-func (s *ValuesStorage) DeleteValues(ctx context.Context, path storage.ValuesStoragePath) error {
+func (s *ValuesStorage) DeleteValues(ctx context.Context, keys []storage.ValuesStorageKey) error {
+	ops := make([]clientv3.Op, 0, len(keys))
+	for _, key := range keys {
+		ops = append(ops, clientv3.OpDelete(s.formatPath(string(key))))
+	}
+
+	if _, err := s.client.Txn(ctx).Then(ops...).Commit(); err != nil {
+		return fmt.Errorf("txn.Commit: %w", err)
+	}
+	return nil
+}
+
+// DeleteValuesByPath ...
+func (s *ValuesStorage) DeleteValuesByPath(ctx context.Context, path storage.ValuesStoragePath) error {
 	if _, err := s.client.Delete(ctx, s.formatPath(string(path)), clientv3.WithPrefix()); err != nil {
 		return fmt.Errorf("client.Delete: %w", err)
 	}

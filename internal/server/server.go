@@ -86,7 +86,9 @@ func (s *Server) initRoutes() {
 		middleware.Recoverer,
 	)
 
-	s.initUI()
+	if err := s.initUI(); err != nil {
+		slog.Warn("initUI", "err", err)
+	}
 
 	s.mux.Route("/api/v1", func(r chi.Router) {
 		r.Get("/projects", s.handleListProjects)
@@ -106,20 +108,10 @@ func (s *Server) initRoutes() {
 	})
 }
 
-func (s *Server) initUI() {
+func (s *Server) initUI() error {
 	sub, err := fs.Sub(assets.FS, "frontend/ui/dist")
 	if err != nil {
-		log.Fatalf("failed to sub embed FS: %v", err)
-	}
-
-	if err := fs.WalkDir(sub, ".", func(path string, _ fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		log.Printf("Found file: %s", path)
-		return nil
-	}); err != nil {
-		log.Printf("Failed to walk embedded FS: %v", err)
+		return fmt.Errorf("fs.Sub: %w", err)
 	}
 
 	fileServer := http.FileServer(http.FS(sub))
@@ -129,4 +121,6 @@ func (s *Server) initUI() {
 
 		fileServer.ServeHTTP(w, r)
 	})))
+
+	return nil
 }

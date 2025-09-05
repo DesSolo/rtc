@@ -1,12 +1,13 @@
 import {Button, Flex, Table, Modal, Input, Typography} from "antd"
 import { useEffect, useState } from "react";
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, RocketOutlined } from '@ant-design/icons';
 import CreateProject from "./Create.jsx";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useOutletContext} from "react-router-dom";
 
 const {Link} = Typography
 
 const ProjectsList = () => {
+    const { setTitle } = useOutletContext();
     const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [pagination, setPagination] = useState({
@@ -20,7 +21,10 @@ const ProjectsList = () => {
         {
             title: "Name",
             dataIndex: "name",
-            key: "name"
+            key: "name",
+            render: (project) => (
+                <a onClick={() => navigateToReleases(project)}>{project}</a>
+            )
         },
         {
             title: "Description",
@@ -34,15 +38,6 @@ const ProjectsList = () => {
             render: (text) => (
                 <>
                     {new Date(text).toLocaleString()}
-                </>
-            )
-        },
-        {
-            title: "Actions",
-            key: "actions",
-            render: (project) => (
-                <>
-                    <Link onClick={() => navigateToReleases(project.name)}>releases</Link>
                 </>
             )
         }
@@ -96,13 +91,14 @@ const ProjectsList = () => {
     }
 
     useEffect(() => {
-            fetchData()
+        fetchData()
+        setTitle('Projects')
     }, [])
 
     return (
         <>
             <Flex justify="space-between" style={{ marginBottom: 16 }}>
-                <Input placeholder="Search" onChange={(e) => search(e.target.value)} />
+                <Input placeholder="Search" onChange={(e) => search(e.target.value)} style={{marginRight: 16}} />
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => (setIsModalOpen(true))}>New</Button>
             </Flex>
             <Table

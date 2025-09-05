@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
+
 	"rtc/internal/storage"
 )
 
@@ -17,49 +19,20 @@ func (s *Storage) Projects(ctx context.Context, limit, offset int) ([]*storage.P
 	}
 	defer rows.Close()
 
-	var projects []*storage.Project
-
-	for rows.Next() {
-		var project storage.Project
-		if err := rows.Scan(&project.ID, &project.Name, &project.Description, &project.CreatedAt); err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
-		}
-
-		projects = append(projects, &project)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows.Err: %w", err)
-	}
-
-	return projects, nil
+	return scanProjects(rows) // nolint:errcheck
 }
 
 // SearchProjects ...
 func (s *Storage) SearchProjects(ctx context.Context, q string, limit int) ([]*storage.Project, error) {
-	query := "SELECT id, name, description FROM projects WHERE name LIKE '%' || $1 || '%' LIMIT $2"
+	query := "SELECT id, name, description, created_at FROM projects WHERE name LIKE '%' || $1 || '%' LIMIT $2"
 
-	var projects []*storage.Project
 	rows, err := s.manager.Conn(ctx).Query(ctx, query, q, limit)
 	if err != nil {
 		return nil, fmt.Errorf("pool.Query: %w", err)
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var project storage.Project
-		if err := rows.Scan(&project.ID, &project.Name, &project.Description); err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
-		}
-
-		projects = append(projects, &project)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows.Err: %w", err)
-	}
-
-	return projects, nil
+	return scanProjects(rows) // nolint:errcheck
 }
 
 // ProjectByName ...
@@ -87,4 +60,23 @@ func (s *Storage) CreateProject(ctx context.Context, project *storage.Project) e
 	}
 
 	return nil
+}
+
+func scanProjects(rows pgx.Rows) ([]*storage.Project, error) {
+	var projects []*storage.Project
+
+	for rows.Next() {
+		var project storage.Project
+		if err := rows.Scan(&project.ID, &project.Name, &project.Description, &project.CreatedAt); err != nil {
+			return nil, fmt.Errorf("rows.Scan: %w", err)
+		}
+
+		projects = append(projects, &project)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows.Err: %w", err)
+	}
+
+	return projects, nil
 }
