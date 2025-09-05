@@ -84,6 +84,15 @@ func convertConfigsToModels(configs []config) []*models.Config {
 	return result
 }
 
+func convertValuesToModels(values map[string]string) models.KV {
+	result := make(models.KV, len(values))
+	for k, v := range values {
+		result[k] = []byte(v)
+	}
+
+	return result
+}
+
 func convertModelsToAudits(audits []*models.Audit) []audit {
 	result := make([]audit, 0, len(audits))
 	for _, modelAudit := range audits {

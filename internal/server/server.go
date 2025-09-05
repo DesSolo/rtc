@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"log/slog"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	assets "rtc"
 	"rtc/internal/provider"
 )
 
@@ -84,6 +86,8 @@ func (s *Server) initRoutes() {
 		middleware.Recoverer,
 	)
 
+	s.initUI()
+
 	s.mux.Route("/api/v1", func(r chi.Router) {
 		r.Get("/projects", s.handleListProjects)
 		r.Post("/projects", s.handleCreateProject)
@@ -95,9 +99,34 @@ func (s *Server) initRoutes() {
 		r.Delete("/projects/{projectName}/envs/{envName}/releases/{releaseName}", s.handleDeleteRelease)
 
 		r.Get("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleListConfigs)
-		r.Put("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleSetConfigValue)
+		r.Put("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleSetConfigValues)
 		r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
 
 		r.Get("/audits", s.handleListAudits)
 	})
+}
+
+func (s *Server) initUI() {
+	sub, err := fs.Sub(assets.FS, "frontend/ui/dist")
+	if err != nil {
+		log.Fatalf("failed to sub embed FS: %v", err)
+	}
+
+	if err := fs.WalkDir(sub, ".", func(path string, _ fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		log.Printf("Found file: %s", path)
+		return nil
+	}); err != nil {
+		log.Printf("Failed to walk embedded FS: %v", err)
+	}
+
+	fileServer := http.FileServer(http.FS(sub))
+
+	s.mux.Handle("/ui/*", http.StripPrefix("/ui", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Пытаемся обслужить статический файл
+
+		fileServer.ServeHTTP(w, r)
+	})))
 }

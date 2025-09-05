@@ -53,3 +53,6 @@ type ValuesStorageKey string
 
 // ValuesStorageValue is a value in values storage
 type ValuesStorageValue []byte
+
+// ValuesStorageKV is alias for map
+type ValuesStorageKV map[ValuesStorageKey]ValuesStorageValue

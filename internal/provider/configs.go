@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/samber/lo"
+
 	"rtc/internal/models"
 	"rtc/internal/storage"
 )
@@ -23,7 +25,7 @@ func (p *Provider) Configs(ctx context.Context, projectName, envName, releaseNam
 		return nil, nil
 	}
 
-	values, err := p.valuesStorage.Values(ctx, formatValuesStoragePath(projectName, envName, releaseName))
+	values, err := p.valuesStorage.ValuesByPath(ctx, formatValuesStoragePath(projectName, envName, releaseName))
 	if err != nil {
 		return nil, fmt.Errorf("valuesStorage.Values: %w", err)
 	}
@@ -31,51 +33,66 @@ func (p *Provider) Configs(ctx context.Context, projectName, envName, releaseNam
 	return convertConfigsToModel(configs, values), nil
 }
 
-// SetConfigValue ...
-func (p *Provider) SetConfigValue(ctx context.Context, projectName, envName, releaseName, key string, value []byte) error {
-	configStorage, err := p.storage.Config(ctx, projectName, envName, releaseName, key)
+// SetConfigValues ...
+func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, releaseName string, kv models.KV) error {
+	storageKeys := lo.MapToSlice(kv, func(key string, _ []byte) string {
+		return key
+	})
+
+	configsFromStorage, err := p.storage.ConfigsByKeys(ctx, projectName, envName, releaseName, storageKeys)
 	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			return ErrNotFound
+		return fmt.Errorf("storage.ConfigsByKeys: %w", err)
+	}
+
+	valuesStorageKeys := lo.Map(configsFromStorage, func(item *storage.Config, _ int) storage.ValuesStorageKey {
+		return formatValuesStorageKey(projectName, envName, releaseName, item.Key)
+	})
+
+	actualValues, err := p.valuesStorage.Values(ctx, valuesStorageKeys)
+	if err != nil {
+		return fmt.Errorf("valuesStorage.Values: %w", err)
+	}
+
+	newValuesStorageItems := make(storage.ValuesStorageKV, len(actualValues))
+
+	for _, config := range convertConfigsToModel(configsFromStorage, actualValues) {
+		newValue, ok := kv[config.Key]
+		if !ok {
+			return fmt.Errorf("missing key %s", config.Key)
 		}
 
-		return fmt.Errorf("storage.Config: %w", err)
+		if err := validateNewValue(config, newValue); err != nil {
+			return fmt.Errorf("validateNewValue key: %q err: %w", config.Key, err)
+		}
+
+		valuesStorageKey := formatValuesStorageKey(projectName, envName, releaseName, config.Key)
+
+		newValuesStorageItems[valuesStorageKey] = newValue
 	}
 
-	valuesStorageKey := formatValuesStorageKey(projectName, envName, releaseName, key)
-
-	actualValue, err := p.valuesStorage.Value(ctx, valuesStorageKey)
-	if err != nil {
-		return fmt.Errorf("valuesStorage.Value: %w", err)
-	}
-
-	config, err := decodeConfigToModel(configStorage, actualValue)
-	if err != nil {
-		return fmt.Errorf("decodeConfigToModel: %w", err)
-	}
-
-	if err := validateNewValue(config, value); err != nil {
-		return fmt.Errorf("validateNewValue: %w", err)
+	updatedStorageConfigIDs := make([]uint64, 0, len(configsFromStorage))
+	for _, config := range configsFromStorage {
+		updatedStorageConfigIDs = append(updatedStorageConfigIDs, config.ID)
 	}
 
 	// TODO: username from context
-	auditRecord, err := encodeAuditRecordConfigUpdated("", key, string(actualValue), string(value))
-	if err != nil {
-		return fmt.Errorf("encodeAuditRecordConfigUpdated: %w", err)
-	}
+	//auditRecord, err := encodeAuditRecordConfigUpdated("", key, string(actualValue), string(value))
+	//if err != nil {
+	//	return fmt.Errorf("encodeAuditRecordConfigUpdated: %w", err)
+	//}
 
 	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := p.valuesStorage.SetValue(ctx, valuesStorageKey, value); err != nil {
+		if err := p.valuesStorage.SetValues(ctx, newValuesStorageItems); err != nil {
 			return fmt.Errorf("valuesStorage.SetValue: %w", err)
 		}
 
-		if err := p.storage.MarkConfigUpdated(ctx, configStorage.ID); err != nil {
+		if err := p.storage.MarkConfigsUpdated(ctx, updatedStorageConfigIDs); err != nil {
 			return fmt.Errorf("storage.MarkConfigUpdated: %w", err)
 		}
 
-		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
-			return fmt.Errorf("storage.CreateAudit: %w", err)
-		}
+		//if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+		//	return fmt.Errorf("storage.CreateAudit: %w", err)
+		//}
 
 		return nil
 	})
@@ -150,19 +167,30 @@ func (p *Provider) UpsertConfigs(ctx context.Context, projectName, envName, rele
 }
 
 func (p *Provider) resolveNewValuesStorageItems(ctx context.Context, configs []*models.Config, projectName, envName, releaseName string) (map[storage.ValuesStorageKey]storage.ValuesStorageValue, error) {
-	newKeys := make(map[storage.ValuesStorageKey]storage.ValuesStorageValue, len(configs))
+	var (
+		keys          = make([]storage.ValuesStorageKey, 0, len(configs))
+		keyToNewValue = make(map[storage.ValuesStorageKey][]byte, len(configs))
+	)
 
 	for _, config := range configs {
 		key := formatValuesStorageKey(projectName, envName, releaseName, config.Key)
+		keys = append(keys, key)
+		keyToNewValue[key] = config.Value
+	}
 
-		if _, err := p.valuesStorage.Value(ctx, key); err != nil {
-			if errors.Is(err, storage.ErrNotFound) {
-				newKeys[key] = config.Value
-				continue
-			}
+	newKeys := make(map[storage.ValuesStorageKey]storage.ValuesStorageValue, len(configs))
 
-			return nil, fmt.Errorf("valuesStorage.Value: %w", err)
+	actualKeys, err := p.valuesStorage.Values(ctx, keys)
+	if err != nil {
+		return nil, fmt.Errorf("valuesStorage.Values: %w", err)
+	}
+
+	for _, key := range keys {
+		if _, ok := actualKeys[key]; ok {
+			continue
 		}
+
+		newKeys[key] = keyToNewValue[key]
 	}
 
 	return newKeys, nil

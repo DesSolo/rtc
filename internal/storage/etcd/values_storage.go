@@ -32,13 +32,39 @@ func NewValuesStorage(client *clientv3.Client, options ...OptionFunc) *ValuesSto
 }
 
 // Values ...
-func (s *ValuesStorage) Values(ctx context.Context, path storage.ValuesStoragePath) (map[storage.ValuesStorageKey]storage.ValuesStorageValue, error) {
+func (s *ValuesStorage) Values(ctx context.Context, keys []storage.ValuesStorageKey) (storage.ValuesStorageKV, error) {
+	ops := make([]clientv3.Op, 0, len(keys))
+	for _, key := range keys {
+		ops = append(ops, clientv3.OpGet(s.formatPath(string(key))))
+	}
+
+	txnResp, err := s.client.Txn(ctx).Then(ops...).Commit()
+	if err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+
+	response := make(storage.ValuesStorageKV, len(keys))
+
+	for _, kv := range txnResp.Responses {
+		getResp := kv.GetResponseRange()
+		if len(getResp.Kvs) != 1 {
+			continue
+		}
+
+		response[decodeStorageKey(getResp.Kvs[0].Key)] = getResp.Kvs[0].Value
+	}
+
+	return response, nil
+}
+
+// ValuesByPath ...
+func (s *ValuesStorage) ValuesByPath(ctx context.Context, path storage.ValuesStoragePath) (storage.ValuesStorageKV, error) {
 	resp, err := s.client.Get(ctx, s.formatPath(string(path)), clientv3.WithPrefix())
 	if err != nil {
 		return nil, fmt.Errorf("client.Get: %w", err)
 	}
 
-	values := make(map[storage.ValuesStorageKey]storage.ValuesStorageValue, len(resp.Kvs))
+	values := make(storage.ValuesStorageKV, len(resp.Kvs))
 	for _, kv := range resp.Kvs {
 		values[decodeStorageKey(kv.Key)] = kv.Value
 	}
@@ -70,18 +96,25 @@ func (s *ValuesStorage) SetValue(ctx context.Context, key storage.ValuesStorageK
 }
 
 // SetValues ...
-func (s *ValuesStorage) SetValues(ctx context.Context, values map[storage.ValuesStorageKey]storage.ValuesStorageValue) error {
-	ops := make([]clientv3.Op, 0, len(values))
+func (s *ValuesStorage) SetValues(ctx context.Context, values storage.ValuesStorageKV) error {
 	for key, value := range values {
-		ops = append(ops, clientv3.OpPut(s.formatPath(string(key)), string(value)))
-	}
-
-	txn := s.client.Txn(ctx)
-	if _, err := txn.Then(ops...).Commit(); err != nil {
-		return fmt.Errorf("txn.Commit: %w", err)
+		if err := s.SetValue(ctx, key, value); err != nil {
+			return err
+		}
 	}
 
 	return nil
+	//ops := make([]clientv3.Op, 0, len(values))
+	//for key, value := range values {
+	//	ops = append(ops, clientv3.OpPut(s.formatPath(string(key)), string(value)))
+	//}
+	//
+	//txn := s.client.Txn(ctx)
+	//if _, err := txn.Then(ops...).Commit(); err != nil {
+	//	return fmt.Errorf("txn.Commit: %w", err)
+	//}
+	//
+	//return nil
 }
 
 // DeleteValues ...

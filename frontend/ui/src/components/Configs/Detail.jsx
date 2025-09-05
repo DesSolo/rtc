@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState} from "react";
 import { useParams } from 'react-router-dom';
 import {
     Card,
@@ -10,8 +10,9 @@ import {
     Row,
     Col,
     Divider,
+    notification,
 } from "antd";
-import { LockOutlined, SearchOutlined } from "@ant-design/icons";
+import { LockOutlined, SearchOutlined, ReloadOutlined} from "@ant-design/icons";
 import EnvironmentsSelector from "../Environments/Selector";
 
 const { Text } = Typography;
@@ -35,7 +36,7 @@ const Highlight = ({ text, query }) => {
     );
 };
 
-const ConfigRow = ({ title, description, control, locked = false, query }) => (
+const ConfigRow = ({ title, description, control, locked = false, query, isChanged }) => (
     <Row align="middle" justify="flex-start" style={{ padding: "12px 0" }}>
         <Col flex="auto" style={{ maxWidth: 500 }}>
             <Text strong>
@@ -45,7 +46,9 @@ const ConfigRow = ({ title, description, control, locked = false, query }) => (
             <Text type="secondary">{description}</Text>
         </Col>
         <Col style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {control}
+            <div style={isChanged ? { border: '2px solid #1890ff', borderRadius: '4px' } : {}}>
+                {control}
+            </div>
             {locked && <LockOutlined style={{ color: "#999" }} />}
         </Col>
     </Row>
@@ -53,13 +56,17 @@ const ConfigRow = ({ title, description, control, locked = false, query }) => (
 
 const ConfigsList = () => {
     const {project, environment, release} = useParams();
+    const groupRefs = useRef({});
+    const [api, contextHolder] = notification.useNotification();
     const [configs, setConfigs] = useState([]);
+    const [currentEnv, setCurrentEnv] = useState(environment)
+    const [originalValues, setOriginalValues] = useState(new Map());
+    const [modifiedValues, setModifiedValues] = useState(new Map());
     const [highlighted, setHighlighted] = useState(null);
     const [filter, setFilter] = useState("");
-    const groupRefs = useRef({});
 
     useEffect(() => {
-        fetchConfigs(environment)
+        fetchConfigs(currentEnv)
     }, []);
 
     const fetchConfigs = async (env) => {
@@ -69,20 +76,90 @@ const ConfigsList = () => {
                 return response.json();
             })
             .then((data) => {
-                setConfigs(data.data.configs);
+                const configsData = data.data.configs;
+                setConfigs(configsData);
+
+                // Сохраняем оригинальные значения
+                const newOriginalValues = new Map();
+                configsData.forEach(cfg => {
+                    newOriginalValues.set(cfg.key, cfg.value);
+                });
+                setOriginalValues(newOriginalValues);
+
+                // Сбрасываем измененные значения
+                setModifiedValues(new Map());
             });
+
+        setCurrentEnv(env)
     }
 
     const handleChange = (key, value) => {
-        setConfigs((prev) =>
-            prev.map((cfg) =>
-                cfg.key === key ? { ...cfg, value: value?.toString() ?? "" } : cfg
-            )
-        );
+        const newValue = value?.toString() ?? "";
+        const originalValue = originalValues.get(key);
+
+        setConfigs((prev) => {
+            return prev.map((cfg) => {
+                if (cfg.key === key) {
+                    return {
+                        ...cfg,
+                        value: newValue
+                    };
+                }
+                return cfg;
+            });
+        });
+
+        setModifiedValues((prev) => {
+            const newMap = new Map(prev);
+
+            if (newValue === originalValue) {
+                // Если значение вернулось к оригинальному, удаляем из изменений
+                newMap.delete(key);
+            } else {
+                // Сохраняем изменение
+                newMap.set(key, {
+                    oldValue: originalValue,
+                    newValue: newValue
+                });
+            }
+
+            return newMap;
+        });
     };
 
     const handleSave = () => {
-        console.log("SAVE:", configs);
+        // Создаем объект только с измененными значениями
+        const changes = {};
+        for (let [key, value] of modifiedValues) {
+            changes[key] = value.newValue;
+        }
+
+        if (changes.length === 0) {
+            return
+        }
+
+        fetch(`/api/v1/projects/${project}/envs/${currentEnv}/releases/${release}/configs`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(changes),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    api.error({
+                        message: "Failed to update",
+                        description: response.status
+                    })
+                    return
+                }
+
+                api.success({
+                    message: "Updated success"
+                })
+
+                return fetchConfigs(currentEnv);
+            })
     };
 
     // группировка
@@ -156,9 +233,23 @@ const ConfigsList = () => {
         }
     };
 
+    const handleReload = () => {
+        fetchConfigs(currentEnv)
+        api.success({
+            message: "Updated"
+        })
+    }
+
     return (
         <>
-            <EnvironmentsSelector project={project} environment={environment} style={{marginBottom: 20}} onEnvChange={(env) => fetchConfigs(env)} />
+            {contextHolder}
+            <Button type="dashed" icon={<ReloadOutlined />} style={{marginRight: 20}} onClick={() => handleReload()}></Button>
+            <EnvironmentsSelector
+                project={project}
+                environment={currentEnv}
+                style={{marginBottom: 20}}
+                onEnvChange={(env) => fetchConfigs(env)}
+            />
             <Row gutter={24} style={{ alignItems: "flex-start" }}>
                 <Col span={20}>
                     <Input
@@ -194,14 +285,20 @@ const ConfigsList = () => {
                                         control={renderControl(cfg)}
                                         locked={!cfg.writable}
                                         query={filter}
+                                        isChanged={modifiedValues.has(cfg.key)}
                                     />
                                     {idx < items.length - 1 && <Divider />}
                                 </div>
                             ))}
                         </Card>
                     ))}
-                    <Button type="primary" onClick={handleSave} style={{ marginTop: 24 }}>
-                        Сохранить
+                    <Button
+                        type="primary"
+                        onClick={handleSave}
+                        style={{ marginTop: 24 }}
+                        disabled={modifiedValues.size === 0}
+                    >
+                        Save ({modifiedValues.size})
                     </Button>
                 </Col>
                 <Col span={4}>

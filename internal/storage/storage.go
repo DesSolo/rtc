@@ -25,9 +25,10 @@ type Storage interface {
 	DeleteRelease(ctx context.Context, envID uint64, releaseName string) error
 
 	Configs(ctx context.Context, projectName, envName, releaseName string) ([]*Config, error)
+	ConfigsByKeys(ctx context.Context, projectName, envName, releaseName string, keys []string) ([]*Config, error)
 	Config(ctx context.Context, projectName, envName, releaseName, key string) (*Config, error)
 	UpsertConfigs(ctx context.Context, configs []*Config) error
-	MarkConfigUpdated(ctx context.Context, ID uint64) error
+	MarkConfigsUpdated(ctx context.Context, IDs []uint64) error
 	DeleteConfigs(ctx context.Context, IDs []uint64) error
 
 	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
@@ -36,9 +37,8 @@ type Storage interface {
 
 // ValuesStorage ...
 type ValuesStorage interface {
-	Values(ctx context.Context, path ValuesStoragePath) (map[ValuesStorageKey]ValuesStorageValue, error)
-	Value(ctx context.Context, key ValuesStorageKey) (ValuesStorageValue, error)
-	SetValue(ctx context.Context, key ValuesStorageKey, v ValuesStorageValue) error
-	SetValues(ctx context.Context, values map[ValuesStorageKey]ValuesStorageValue) error
+	Values(ctx context.Context, keys []ValuesStorageKey) (ValuesStorageKV, error)
+	ValuesByPath(ctx context.Context, path ValuesStoragePath) (ValuesStorageKV, error)
+	SetValues(ctx context.Context, values ValuesStorageKV) error
 	DeleteValues(ctx context.Context, path ValuesStoragePath) error
 }

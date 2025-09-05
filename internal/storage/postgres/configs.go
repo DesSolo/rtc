@@ -40,6 +40,36 @@ func (s *Storage) Configs(ctx context.Context, projectName, envName, releaseName
 	return configs, nil
 }
 
+// ConfigsByKeys ...
+func (s *Storage) ConfigsByKeys(ctx context.Context, projectName, envName, releaseName string, keys []string) ([]*storage.Config, error) {
+	query := `
+		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM configs c
+		JOIN releases r ON r.id = c.release_id
+		JOIN environments e ON e.id = r.environment_id
+		JOIN projects p ON p.id = e.project_id
+		WHERE p.name = $1 AND e.name = $2 AND r.name = $3 AND c.key = ANY ($4)
+	`
+
+	rows, err := s.manager.Conn(ctx).Query(ctx, query, projectName, envName, releaseName, keys)
+	if err != nil {
+		return nil, fmt.Errorf("pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	var configs []*storage.Config
+
+	for rows.Next() {
+		var config storage.Config
+		if err := rows.Scan(&config.ID, &config.ReleaseID, &config.Key, &config.ValueType, &config.Metadata, &config.CreatedAt, &config.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("rows.Scan: %w", err)
+		}
+
+		configs = append(configs, &config)
+	}
+
+	return configs, nil
+}
+
 // Config ...
 func (s *Storage) Config(ctx context.Context, projectName, envName, releaseName, key string) (*storage.Config, error) {
 	query := `
@@ -88,11 +118,11 @@ func (s *Storage) UpsertConfigs(ctx context.Context, configs []*storage.Config) 
 	return nil
 }
 
-// MarkConfigUpdated ...
-func (s *Storage) MarkConfigUpdated(ctx context.Context, ID uint64) error {
-	query := "UPDATE configs SET updated_at = NOW() WHERE id = $1"
+// MarkConfigsUpdated ...
+func (s *Storage) MarkConfigsUpdated(ctx context.Context, IDs []uint64) error {
+	query := "UPDATE configs SET updated_at = NOW() WHERE id = ANY($1)"
 
-	if _, err := s.manager.Conn(ctx).Exec(ctx, query, ID); err != nil {
+	if _, err := s.manager.Conn(ctx).Exec(ctx, query, IDs); err != nil {
 		return fmt.Errorf("pool.Exec: %w", err)
 	}
 

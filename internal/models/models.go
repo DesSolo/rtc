@@ -26,6 +26,9 @@ const (
 	ValueTypeFloat64 ValueType = "float64"
 )
 
+// KV key value
+type KV map[string][]byte
+
 // ConfigMetadataView specific view options
 type ConfigMetadataView struct {
 	Enum string

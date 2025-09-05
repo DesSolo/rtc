@@ -45,3 +45,9 @@ RELEASE_DIRECTORY = ${LOCAL_BIN}/release
 
 clear-release:
 	rm -rf ${RELEASE_DIRECTORY}
+
+build-ui:
+	cd frontend/ui && npm run build
+
+build-app:
+	go build -o ${RELEASE_DIRECTORY}/${PROJECT_NAME} ${MAIN_FILE_PATH}
