@@ -3,7 +3,6 @@ import {useEffect, useState} from "react";
 
 const CardContent = ({action, payload}) => {
     const decodedPayload = JSON.parse(atob(payload))
-    console.log(atob(payload))
     return (
         <>
             <p>env: {decodedPayload.environment}</p>
