@@ -65,6 +65,7 @@ const ConfigsList = () => {
     const [api, contextHolder] = notification.useNotification();
 
     const [configs, setConfigs] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [currentEnv, setCurrentEnv] = useState(environment);
     const [originalValues, setOriginalValues] = useState(new Map());
     const [modifiedValues, setModifiedValues] = useState(new Map());
@@ -209,15 +210,17 @@ const ConfigsList = () => {
     };
 
     const handleReload = async () => {
+        setLoading(true)
         await fetchConfigs(currentEnv);
-        api.success({ message: "Updated" });
+        api.success({ message: "Reloaded" });
+        setLoading(false)
     };
 
     return (
         <>
             {contextHolder}
             <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-                <Button type="dashed" icon={<ReloadOutlined />} onClick={handleReload} />
+                <Button type="dashed" icon={<ReloadOutlined />} onClick={handleReload} loading={loading} />
                 <EnvironmentsSelector
                     project={project}
                     environment={currentEnv}
