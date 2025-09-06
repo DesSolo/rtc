@@ -1,6 +1,7 @@
 import { Button, Checkbox, Form, Input, message, Card, Typography } from 'antd';
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const { Title } = Typography;
 
@@ -27,6 +28,9 @@ const Login = () => {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.data.token);
+
+                const decoded = jwtDecode(data.data.token)
+                localStorage.setItem('jwt', JSON.stringify(decoded))
                 messageApi.success('Login successful!');
                 navigate("/")
             } else if (response.status === 401) {
