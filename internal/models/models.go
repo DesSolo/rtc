@@ -88,3 +88,11 @@ type Audit struct {
 	Payload []byte
 	Ts      time.Time
 }
+
+// User ...
+type User struct {
+	Username  string
+	IsEnabled bool
+	Roles     []string
+	CreatedAt time.Time
+}

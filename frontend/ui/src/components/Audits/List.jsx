@@ -1,5 +1,6 @@
 import {Card, Flex, Input} from "antd";
 import {useEffect, useState} from "react";
+import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const CardContent = ({action, payload}) => {
     const decodedPayload = JSON.parse(atob(payload))
@@ -22,7 +23,7 @@ const AuditList = () => {
     const [audits, setAudits] = useState([])
 
     useEffect(() => {
-        fetch('/api/v1/audits')
+        fetchWithAuth('/api/v1/audits')
             .then((response) => {
                 if (!response.ok) throw new Error("err");
                 return response.json();

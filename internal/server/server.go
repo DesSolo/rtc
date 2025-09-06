@@ -14,7 +14,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	assets "rtc"
+	"rtc/internal/auth"
 	"rtc/internal/provider"
+	"rtc/internal/server/middlewares"
 )
 
 const (
@@ -27,6 +29,7 @@ const (
 // Server HTTP server
 type Server struct {
 	provider *provider.Provider
+	auth     *auth.JWT
 
 	address           string
 	readHeaderTimeout time.Duration
@@ -34,9 +37,10 @@ type Server struct {
 }
 
 // NewServer ...
-func NewServer(provider *provider.Provider, options ...OptionFunc) *Server {
+func NewServer(provider *provider.Provider, auth *auth.JWT, options ...OptionFunc) *Server {
 	s := &Server{
 		provider:          provider,
+		auth:              auth,
 		address:           defaultAddress,
 		readHeaderTimeout: defaultReadHeaderTimeout,
 		mux:               chi.NewRouter(),
@@ -91,20 +95,27 @@ func (s *Server) initRoutes() {
 	}
 
 	s.mux.Route("/api/v1", func(r chi.Router) {
-		r.Get("/projects", s.handleListProjects)
-		r.Post("/projects", s.handleCreateProject)
 
-		r.Get("/projects/{projectName}/envs", s.handleListEnvironments)
+		r.Post("/login", s.handleLogin)
 
-		r.Get("/projects/{projectName}/envs/{envName}/releases", s.handleListReleases)
+		r.Group(func(r chi.Router) {
+			r.Use(middlewares.JWTAuth(s.auth))
 
-		r.Delete("/projects/{projectName}/envs/{envName}/releases/{releaseName}", s.handleDeleteRelease)
+			r.Get("/projects", s.handleListProjects)
+			r.Post("/projects", s.handleCreateProject)
 
-		r.Get("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleListConfigs)
-		r.Put("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleSetConfigValues)
-		r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
+			r.Get("/projects/{projectName}/envs", s.handleListEnvironments)
 
-		r.Get("/audits", s.handleListAudits)
+			r.Get("/projects/{projectName}/envs/{envName}/releases", s.handleListReleases)
+
+			r.Delete("/projects/{projectName}/envs/{envName}/releases/{releaseName}", s.handleDeleteRelease)
+
+			r.Get("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleListConfigs)
+			r.Put("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleSetConfigValues)
+			r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
+
+			r.Get("/audits", s.handleListAudits)
+		})
 	})
 }
 

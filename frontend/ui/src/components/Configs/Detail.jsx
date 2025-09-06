@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { LockOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import EnvironmentsSelector from "../Environments/Selector";
+import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const { Text } = Typography;
 
@@ -75,7 +76,7 @@ const ConfigsList = () => {
     // fetchConfigs — мемоизированная, чтобы не пересоздавать в эффектах
     const fetchConfigs = useCallback(async (env) => {
         try {
-            const resp = await fetch(`/api/v1/projects/${project}/envs/${env}/releases/${release}/configs`);
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${env}/releases/${release}/configs`);
             if (!resp.ok) throw new Error(`status ${resp.status}`);
             const data = await resp.json();
             const configsData = data.data?.configs || [];
@@ -122,7 +123,7 @@ const ConfigsList = () => {
         if (Object.keys(changes).length === 0) return;
 
         try {
-            const resp = await fetch(`/api/v1/projects/${project}/envs/${currentEnv}/releases/${release}/configs`, {
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${currentEnv}/releases/${release}/configs`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(changes),

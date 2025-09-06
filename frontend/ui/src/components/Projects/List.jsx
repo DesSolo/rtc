@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import CreateProject from "./Create.jsx";
 import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
+import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const ProjectsList = () => {
     const { setTitle } = useOutletContext();
@@ -34,7 +35,7 @@ const ProjectsList = () => {
         setLoading(true);
         try {
             const uri = `/api/v1/projects?limit=${pageSize}&offset=${(page - 1) * pageSize}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-            const res = await fetch(uri);
+            const res = await fetchWithAuth(uri);
             if (!res.ok) throw new Error(res.statusText);
             const json = await res.json();
             setData(json.data.projects || []);

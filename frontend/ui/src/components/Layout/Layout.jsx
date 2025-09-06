@@ -1,17 +1,23 @@
 import React, {useState} from "react";
-import { Outlet } from 'react-router-dom';
+import {Outlet, useNavigate} from 'react-router-dom';
 import { Button, Layout, theme } from "antd";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined, LogoutOutlined } from "@ant-design/icons";
 import NavBar from "../Nav/NavBar.jsx";
 
 const { Header, Content } = Layout;
 
 export const LayoutWithNav = () => {
     const [collapsed, setCollapsed] = useState(false);
-    const [title, setTitle] = useState('')
+    const [title, setTitle] = useState('');
+    const navigate = useNavigate();
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        navigate('/login')
+    }
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
@@ -31,6 +37,7 @@ export const LayoutWithNav = () => {
                     <span style={{ marginLeft: 16, fontSize: '18px', fontWeight: 'bold' }}>
                         {title}
                     </span>
+                    <LogoutOutlined onClick={handleLogout} />
                 </Header>
                 <Content
                     style={{

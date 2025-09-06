@@ -16,6 +16,13 @@ type Config struct {
 	Server struct {
 		Address           string        `yaml:"address"`
 		ReadHeaderTimeout time.Duration `yaml:"read_header_timeout"`
+		Auth              struct {
+			JWT struct {
+				PrivateKey string        `yaml:"private_key"`
+				PublicKey  string        `yaml:"public_key"`
+				TTL        time.Duration `yaml:"ttl"`
+			} `yaml:"jwt"`
+		} `yaml:"auth"`
 	} `yaml:"server"`
 	Storage struct {
 		DSN string `yaml:"dsn"`

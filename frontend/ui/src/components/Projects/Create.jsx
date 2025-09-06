@@ -1,11 +1,12 @@
 import { Form, Input, message, notification } from "antd";
+import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const CreateProject = ({ onSuccess }) => {
     const [api, contextHolder] = notification.useNotification();
 
     const onFinish = async (values) => {
         try {
-            const response = await fetch("/api/v1/projects", {
+            const response = await fetchWithAuth("/api/v1/projects", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

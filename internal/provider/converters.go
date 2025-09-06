@@ -118,3 +118,12 @@ func convertAuditsToModels(audits []*storage.Audit) []*models.Audit {
 
 	return result
 }
+
+func convertUserToModel(user *storage.User) *models.User {
+	return &models.User{
+		Username:  user.Username,
+		IsEnabled: user.IsEnabled,
+		Roles:     user.Roles,
+		CreatedAt: user.CreatedAt,
+	}
+}

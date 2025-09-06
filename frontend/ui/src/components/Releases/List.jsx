@@ -3,6 +3,7 @@ import {useNavigate, useOutletContext} from "react-router-dom";
 import EnvironmentsSelector from "../Environments/Selector.jsx";
 import { Button, Table, Flex, Popconfirm, notification } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
+import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const ReleasesList = ({ project }) => {
     const { setTitle } = useOutletContext();
@@ -17,7 +18,7 @@ const ReleasesList = ({ project }) => {
 
     const fetchReleases = useCallback(async (environment) => {
         try {
-            const resp = await fetch(`/api/v1/projects/${project}/envs/${environment}/releases`);
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${environment}/releases`);
             if (!resp.ok) throw new Error(`status ${resp.status}`);
             const data = await resp.json();
             setReleases(data.data?.releases || []);
@@ -28,7 +29,7 @@ const ReleasesList = ({ project }) => {
 
     const deleteRelease = useCallback(async (name) => {
         try {
-            const resp = await fetch(`/api/v1/projects/${project}/envs/${env}/releases/${name}`, {
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${env}/releases/${name}`, {
                 method: "DELETE",
             });
             if (!resp.ok) throw new Error(`status ${resp.status}`);

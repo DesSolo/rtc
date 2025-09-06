@@ -45,6 +45,16 @@ type Audit struct {
 	Ts      time.Time
 }
 
+// User ...
+type User struct {
+	ID           uint64
+	Username     string
+	PasswordHash string
+	IsEnabled    bool
+	Roles        []string
+	CreatedAt    time.Time
+}
+
 // ValuesStoragePath values path like foo/bar/baz
 type ValuesStoragePath string
 

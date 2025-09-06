@@ -13,5 +13,5 @@ CREATE INDEX ids_audit_log_action ON audit_log(action);
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXIST audit_log;
+DROP TABLE IF EXISTS audit_log;
 -- +goose StatementEnd

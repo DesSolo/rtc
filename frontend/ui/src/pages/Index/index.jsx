@@ -5,6 +5,8 @@ import ProjectsList from "../../components/Projects/List.jsx";
 import ConfigsList from "../../components/Configs/Detail.jsx";
 import Releases from "../Releases/index.jsx";
 import Audit from "../Audit/index.jsx";
+import Login from "../Login/index.jsx"
+
 
 const Index = () => {
     return (
@@ -16,7 +18,7 @@ const Index = () => {
                 <Route path="audit" element={<Audit />} />
             </Route>
 
-            {/*<Route path="login" element={<Login />} />*/}
+            <Route path="login" element={<Login />} />
         </Routes>
     );
 };

@@ -33,6 +33,10 @@ type Storage interface {
 
 	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
 	AddAuditRecord(ctx context.Context, audit *Audit) error
+
+	Users(ctx context.Context, limit, offset int) ([]*User, error)
+	User(ctx context.Context, username string) (*User, error)
+	CreateUser(ctx context.Context, user *User) error
 }
 
 // ValuesStorage ...

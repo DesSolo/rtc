@@ -8,6 +8,7 @@ import (
 
 	"github.com/samber/lo"
 
+	"rtc/internal/auth"
 	"rtc/internal/models"
 	"rtc/internal/storage"
 )
@@ -82,8 +83,8 @@ func (p *Provider) SetConfigValues(ctx context.Context, projectName, envName, re
 		updatedStorageConfigIDs = append(updatedStorageConfigIDs, config.ID)
 	}
 
-	// TODO: username from context
-	auditRecord, err := encodeAuditRecordConfigUpdated("", &auditRecordConfigUpdated{
+	actor := auth.UsernameFromContext(ctx)
+	auditRecord, err := encodeAuditRecordConfigUpdated(actor, &auditRecordConfigUpdated{
 		ProjectName:     projectName,
 		EnvironmentName: envName,
 		ReleaseName:     releaseName,

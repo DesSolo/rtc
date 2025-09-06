@@ -1,6 +1,9 @@
 package server
 
-import "rtc/internal/models"
+import (
+	"rtc/internal/auth"
+	"rtc/internal/models"
+)
 
 func convertModelsToProjects(projects []*models.Project) []project {
 	result := make([]project, 0, len(projects))
@@ -105,4 +108,11 @@ func convertModelsToAudits(audits []*models.Audit) []audit {
 	}
 
 	return result
+}
+
+func convertModelToAuth(user *models.User) *auth.Payload {
+	return &auth.Payload{
+		Username: user.Username,
+		Roles:    user.Roles,
+	}
 }

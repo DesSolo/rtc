@@ -13,6 +13,57 @@ server:
   address: ":8080"
   # timeout for read header
   read_header_timeout: 3s
+  # authentication settings block
+  auth:
+    # jwt options
+    #  using RSA keys split sign and verify
+    #  example generate:
+    #   openssl genrsa -out private.pem 2048
+    #   openssl rsa -in private.pem -pubout -out public.pem
+    jwt:
+      # RSA private key (sign)
+      private_key: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRxafvGOWeBdXf
+        bqIn+hYa3XoQN9KdM2jJf1aLmctjzBY/RbV2rV0OnwsxyJL8mNcujoJHylg3krlZ
+        dAFI8NMrxPOvbU5bfNFrOeDNc7DSr3kECA2QxabmTmrldbnosUOoOR7dBu26M0jL
+        DrKd0nImlW+3xZPgRwNSd6S6rbKRbpFAzrK20KkecOFPm4YemxxodOrhYwfgVV0f
+        nhUJXanKXR1o9ry04unXViNCrIWtTS8DyG6iXe2wgNUlkX7XaqdikwSu028xkbt/
+        sgKupXWIuuLOZqeY9tlPF7nkRL556+8eqN/KWpiCckfaCVfAqkh5yS4XAgySiOZF
+        B2GOu+ErAgMBAAECggEAOeFHivJRyer7PtpI3KK6QDSMkP/5Sp3tD4TWMlwAnEGe
+        28SsBtFTT8jqwvunEVEGr9+57xNy7638ln4vPG0TDCAJujAmmsD2ziKPFkTHgwBV
+        hrpD2KYCXRPp8e5KwRARkywLCywDHJncX3QYi/3RgWx4jXmP+892jDohWFY7vu6U
+        gBsdzPr+1l3MtjNurYnld0YxbQUDHoKHyGm11dNzhTuGRL7wi7saUNyI96PZgGMl
+        pZLh7lesZAqAOuBt5BlHoIOfqGIxYu0HIjSCbSknizq9t1EpEO9hdVFo4+sNutjh
+        qt2yT9gybBa5oqiUgOBlIyk86bVlDjdSUmp5y2A+8QKBgQDKR5heBePBAxDRfZgN
+        SKLwebiWDmsi9C1o8Vp73YdJaVuCP3i0q2sqHzkIR109TFicTeLgzJ2fCbmLwoh9
+        XSsslfbAtMoaBfjHwNeaj1639h+sx0eydLq6a3Ogy9qws+cSdBVFKrfYZ67F/90A
+        59ZBgPSqxLcY/7HP6YALLPgGJwKBgQC4fEaLY3RbDvQhVOoP5V6sAnQ7m46v5rqi
+        C5Sy7mW4V5JENnJZ3IgygeETnwrhACAEQG2EiTd+wuLeiNNcxHP6H1qbLd0Vm17t
+        ky08K4TKZb40afFxqvgoNWeN0WfGXxv5zvaPnBbQguBBjulkJzACxAlheFKjGp5C
+        PKFJnSVTXQKBgBROWaJerv1qRF7zX7c9qnW/kmMl8WVh48kcKXwzwegBtpj9rC1e
+        4/QnjD8jgt2rc13Fh9gPUmdrv3+jOLZ1Cud/6nRv8bXpEY9j8YDnkZegEo/ytWTZ
+        yQD71nC25i5E8RZuJtB5uFj2F5py1AnKPDz5KBaYhtTwnjYD98GncwKTAoGBAJqc
+        LFLtCrq1kYvNqkugIvNtKxQ5jh+E8qyToA9FFCKl4YMhTjxZQhtyFbtn8qoWfL6T
+        cDU++i9WDOQLL3fzfG8Gj9y1Vy+ggrIAQkzG/AbTtdAfaaWlb0vjVeHYuWvakYuO
+        E7zPR59/z4mhx5+T5/ypZmM1f6wJxtAkF9elx35RAoGBAMP+sl8ZuG+n2hoCPHqe
+        3PzSqctg+penhZSkMHTzvYnR0M5mrMvDv9bHwCkI9z+zNjqOsFnEOLEmE7m9+rvO
+        EgZ9E+RUA4VNRkHuWGW8UX99cJORqdrTkNQT2+a5xuCBitSghVuSfr11Pq6UgNSb
+        dx+9mWF16R7AHjB2pekMmCnv
+        -----END PRIVATE KEY-----
+      # RSA public key (verify)
+      public_key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkcWn7xjlngXV326iJ/oW
+        Gt16EDfSnTNoyX9Wi5nLY8wWP0W1dq1dDp8LMciS/JjXLo6CR8pYN5K5WXQBSPDT
+        K8Tzr21OW3zRazngzXOw0q95BAgNkMWm5k5q5XW56LFDqDke3QbtujNIyw6yndJy
+        JpVvt8WT4EcDUnekuq2ykW6RQM6yttCpHnDhT5uGHpscaHTq4WMH4FVdH54VCV2p
+        yl0daPa8tOLp11YjQqyFrU0vA8huol3tsIDVJZF+12qnYpMErtNvMZG7f7ICrqV1
+        iLrizmanmPbZTxe55ES+eevvHqjfylqYgnJH2glXwKpIeckuFwIMkojmRQdhjrvh
+        KwIDAQAB
+        -----END PUBLIC KEY-----
+      # ttl for key
+      ttl: 24h
 
 # storage settings block
 storage:

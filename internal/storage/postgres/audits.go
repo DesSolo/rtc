@@ -9,7 +9,7 @@ import (
 
 // AuditsByAction ...
 func (s *Storage) AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*storage.Audit, error) {
-	query := "SELECT id, action, actor, payload, ts FROM audit_log WHERE action = $1 LIMIT $2 OFFSET $3"
+	query := "SELECT id, action, actor, payload, ts FROM audit_log WHERE action = $1 ORDER BY id DESC LIMIT $2 OFFSET $3"
 
 	rows, err := s.manager.Conn(ctx).Query(ctx, query, action, limit, offset)
 	if err != nil {
