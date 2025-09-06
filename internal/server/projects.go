@@ -18,6 +18,7 @@ type project struct {
 
 type listProjectsResponse struct {
 	Projects []project `json:"projects"`
+	Total    uint64    `json:"total"`
 }
 
 func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,7 @@ func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
 	limit := queryOr(r, "limit", 10)
 	offset := queryOr(r, "offset", 0)
 
-	projects, err := s.provider.Projects(ctx, q, limit, offset)
+	projects, total, err := s.provider.Projects(ctx, q, limit, offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "provider.Projects", "err", err)
 		respondError(ctx, w, http.StatusInternalServerError, err.Error())
@@ -36,6 +37,7 @@ func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
 
 	respondData(ctx, w, http.StatusOK, listProjectsResponse{
 		Projects: convertModelsToProjects(projects),
+		Total:    total,
 	})
 }
 

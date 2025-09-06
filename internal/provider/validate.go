@@ -85,6 +85,7 @@ func validateNewValue(config *models.Config, newValue []byte) error {
 
 func validateUpsert(configs []*models.Config) error {
 	// etcd maximum items in one transaction
+	// TODO: add chunked wrapper
 	if len(configs) > 128 {
 		return fmt.Errorf("%w: to many configs", ErrNotValid)
 	}

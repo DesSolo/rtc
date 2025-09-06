@@ -10,29 +10,29 @@ import (
 )
 
 // Projects ...
-func (s *Storage) Projects(ctx context.Context, limit, offset int) ([]*storage.Project, error) {
-	query := "SELECT id, name, description, created_at FROM projects ORDER BY id DESC LIMIT $1 OFFSET $2"
+func (s *Storage) Projects(ctx context.Context, limit, offset int) ([]*storage.Project, uint64, error) {
+	query := "SELECT id, name, description, created_at, COUNT(*) OVER() AS total FROM projects ORDER BY id DESC LIMIT $1 OFFSET $2"
 
 	rows, err := s.manager.Conn(ctx).Query(ctx, query, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("pool.Query: %w", err)
+		return nil, 0, fmt.Errorf("pool.Query: %w", err)
 	}
 	defer rows.Close()
 
-	return scanProjects(rows) // nolint:errcheck
+	return scanProjectsWithTotal(rows) // nolint:errcheck
 }
 
 // SearchProjects ...
-func (s *Storage) SearchProjects(ctx context.Context, q string, limit int) ([]*storage.Project, error) {
-	query := "SELECT id, name, description, created_at FROM projects WHERE name LIKE '%' || $1 || '%' LIMIT $2"
+func (s *Storage) SearchProjects(ctx context.Context, q string, limit, offset int) ([]*storage.Project, uint64, error) {
+	query := "SELECT id, name, description, created_at , COUNT(*) OVER() AS total FROM projects WHERE name LIKE '%' || $1 || '%' LIMIT $2 OFFSET $3"
 
-	rows, err := s.manager.Conn(ctx).Query(ctx, query, q, limit)
+	rows, err := s.manager.Conn(ctx).Query(ctx, query, q, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("pool.Query: %w", err)
+		return nil, 0, fmt.Errorf("pool.Query: %w", err)
 	}
 	defer rows.Close()
 
-	return scanProjects(rows) // nolint:errcheck
+	return scanProjectsWithTotal(rows) // nolint:errcheck
 }
 
 // ProjectByName ...
@@ -62,21 +62,24 @@ func (s *Storage) CreateProject(ctx context.Context, project *storage.Project) e
 	return nil
 }
 
-func scanProjects(rows pgx.Rows) ([]*storage.Project, error) {
-	var projects []*storage.Project
+func scanProjectsWithTotal(rows pgx.Rows) ([]*storage.Project, uint64, error) {
+	var (
+		projects []*storage.Project
+		total    uint64
+	)
 
 	for rows.Next() {
 		var project storage.Project
-		if err := rows.Scan(&project.ID, &project.Name, &project.Description, &project.CreatedAt); err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
+		if err := rows.Scan(&project.ID, &project.Name, &project.Description, &project.CreatedAt, &total); err != nil {
+			return nil, 0, fmt.Errorf("rows.Scan: %w", err)
 		}
 
 		projects = append(projects, &project)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows.Err: %w", err)
+		return nil, 0, fmt.Errorf("rows.Err: %w", err)
 	}
 
-	return projects, nil
+	return projects, total, nil
 }
