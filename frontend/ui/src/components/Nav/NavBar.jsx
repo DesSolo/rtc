@@ -5,7 +5,7 @@ import {
     UserOutlined // 👈 Добавляем иконку пользователя
 } from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
-import { getUsername } from "../../utils/storage.js";
+import {getUsername, hasRole} from "../../utils/storage.js";
 
 const { Text } = Typography;
 const { Sider } = Layout;
@@ -45,11 +45,11 @@ const NavBar = ({ collapsed }) => {
                         icon: <AuditOutlined />,
                         label: 'Audit logs',
                     },
-                    {
+                    ...(hasRole('admin') ? [{
                         key: '/users',
                         icon: <UserOutlined />,
                         label: 'Users',
-                    },
+                    }]: [])
                 ]}
                 onClick={(e) => {
                     navigate(e.key);
