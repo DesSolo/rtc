@@ -25,8 +25,8 @@ func (s *Server) handleListProjects(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	q := r.URL.Query().Get("q")
-	limit := queryOr(r, "limit", 10)
-	offset := queryOr(r, "offset", 0)
+	limit := queryOr[uint64](r, "limit", 10)
+	offset := queryOr[uint64](r, "offset", 0)
 
 	projects, total, err := s.provider.Projects(ctx, q, limit, offset)
 	if err != nil {

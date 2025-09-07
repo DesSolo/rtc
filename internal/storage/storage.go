@@ -10,7 +10,7 @@ type Storage interface {
 
 	WithTransaction(ctx context.Context, f func(ctx context.Context) error) error
 
-	Projects(ctx context.Context, q string, limit, offset int) ([]*Project, uint64, error)
+	Projects(ctx context.Context, q string, limit, offset uint64) ([]*Project, uint64, error)
 	ProjectByName(ctx context.Context, name string) (*Project, error)
 	CreateProject(ctx context.Context, project *Project) error
 
@@ -33,7 +33,7 @@ type Storage interface {
 	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
 	AddAuditRecord(ctx context.Context, audit *Audit) error
 
-	Users(ctx context.Context, query string, limit, offset int) ([]*User, uint64, error)
+	Users(ctx context.Context, q string, limit, offset uint64) ([]*User, uint64, error)
 	User(ctx context.Context, username string) (*User, error)
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, id uint64, user *User) error

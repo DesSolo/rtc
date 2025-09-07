@@ -10,12 +10,12 @@ import (
 )
 
 // Projects ...
-func (s *Storage) Projects(ctx context.Context, q string, limit, offset int) ([]*storage.Project, uint64, error) {
+func (s *Storage) Projects(ctx context.Context, q string, limit, offset uint64) ([]*storage.Project, uint64, error) {
 	query := queryBuilder().
 		Select("id, name, description, created_at, COUNT(*) OVER() AS total").
 		From("projects").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(limit).
+		Offset(offset).
 		OrderBy("id DESC")
 
 	if q != "" {

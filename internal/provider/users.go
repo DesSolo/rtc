@@ -44,20 +44,20 @@ func isValidPassword(hash, password string) bool {
 	return true
 }
 
-// ChangePassword ...
-func (p *Provider) ChangePassword(ctx context.Context, username, oldPassword, newPassword string) error {
-	// TODO: implement
-	return nil
-}
-
-// ResetPassword ...
-func (p *Provider) ResetPassword(ctx context.Context, username string) error {
-	// TODO: implement
-	return nil
-}
+//// ChangePassword ...
+//func (p *Provider) ChangePassword(ctx context.Context, username, oldPassword, newPassword string) error {
+//	// TODO: implement
+//	return nil
+//}
+//
+//// ResetPassword ...
+//func (p *Provider) ResetPassword(ctx context.Context, username string) error {
+//	// TODO: implement
+//	return nil
+//}
 
 // ListUsers ...
-func (p *Provider) ListUsers(ctx context.Context, q string, limit, offset int) ([]*models.User, uint64, error) {
+func (p *Provider) ListUsers(ctx context.Context, q string, limit, offset uint64) ([]*models.User, uint64, error) {
 	users, total, err := p.storage.Users(ctx, q, limit, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("storage.Users: %w", err)

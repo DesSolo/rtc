@@ -19,7 +19,7 @@ type JWT struct {
 func NewJWT(private *rsa.PrivateKey, public *rsa.PublicKey, ttl time.Duration) *JWT {
 	return &JWT{
 		private: private,
-		keyFunc: func(token *jwt.Token) (any, error) {
+		keyFunc: func(_ *jwt.Token) (any, error) {
 			return public, nil
 		},
 		ttl: ttl,

@@ -71,8 +71,8 @@ func (s *Server) handleListUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	q := r.URL.Query().Get("q")
-	limit := queryOr(r, "limit", 10)
-	offset := queryOr(r, "offset", 0)
+	limit := queryOr[uint64](r, "limit", 10)
+	offset := queryOr[uint64](r, "offset", 0)
 
 	users, total, err := s.provider.ListUsers(ctx, q, limit, offset)
 	if err != nil {

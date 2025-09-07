@@ -11,12 +11,12 @@ import (
 )
 
 // Users ...
-func (s *Storage) Users(ctx context.Context, q string, limit, offset int) ([]*storage.User, uint64, error) {
+func (s *Storage) Users(ctx context.Context, q string, limit, offset uint64) ([]*storage.User, uint64, error) {
 	query := queryBuilder().
 		Select("id, username, password_hash, is_enabled, roles, created_at, COUNT(*) OVER()").
 		From("users").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(limit).
+		Offset(offset).
 		OrderBy("id DESC")
 
 	if q != "" {
@@ -49,7 +49,6 @@ func (s *Storage) Users(ctx context.Context, q string, limit, offset int) ([]*st
 	}
 
 	return users, total, nil
-
 }
 
 // User ...

@@ -75,6 +75,10 @@ func queryOr[T any](r *http.Request, key string, bo T) T {
 		if intVal, err := strconv.Atoi(val); err == nil {
 			return any(intVal).(T)
 		}
+	case uint64:
+		if uintVal, err := strconv.ParseUint(val, 10, 64); err == nil {
+			return any(uintVal).(T)
+		}
 	}
 
 	return bo

@@ -95,7 +95,6 @@ func (s *Server) initRoutes() {
 	}
 
 	s.mux.Route("/api/v1", func(r chi.Router) {
-
 		r.Post("/login", s.handleLogin)
 
 		r.Group(func(r chi.Router) {
