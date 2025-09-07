@@ -47,6 +47,11 @@ func (j *JWT) Decode(token string) (*Payload, error) {
 	return fromClaims(customClaims), nil
 }
 
+// Authenticate ...
+func (j *JWT) Authenticate(token string) (*Payload, error) {
+	return j.Decode(token)
+}
+
 type claims struct {
 	Username string
 	Roles    []string

@@ -43,7 +43,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.auth.Encode(convertModelToAuth(user))
+	token, err := s.jwt.Encode(convertModelToAuth(user))
 	if err != nil {
 		slog.ErrorContext(ctx, "auth.Encode", "err", err)
 		respondError(ctx, w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

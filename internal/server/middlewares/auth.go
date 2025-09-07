@@ -7,44 +7,45 @@ import (
 	"rtc/internal/auth"
 )
 
-// JWTAuth ...
-func JWTAuth(jwt *auth.JWT) func(next http.Handler) http.Handler {
+// Authenticate ...
+func Authenticate(authenticators map[string]auth.Authenticator) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			jwtToken := parseJWTToken(r)
-			if jwtToken == "" {
+			kind, token := parseAuthorization(r)
+			if kind == "" {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
-			p, err := jwt.Decode(jwtToken)
+			authAlgo, ok := authenticators[kind]
+			if !ok {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			payload, err := authAlgo.Authenticate(token)
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
 			next.ServeHTTP(w, r.WithContext(
-				auth.ToContext(r.Context(), p),
+				auth.ToContext(r.Context(), payload),
 			))
 		})
 	}
 }
 
-func parseJWTToken(r *http.Request) string {
+func parseAuthorization(r *http.Request) (string, string) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return ""
+		return "", ""
 	}
 
-	const prefix = "jwt "
-	if !strings.HasPrefix(authHeader, prefix) {
-		return ""
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 {
+		return "", ""
 	}
 
-	token := authHeader[len(prefix):]
-	if len(token) == 0 {
-		return ""
-	}
-
-	return token
+	return parts[0], parts[1]
 }

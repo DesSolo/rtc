@@ -29,7 +29,8 @@ const (
 // Server HTTP server
 type Server struct {
 	provider *provider.Provider
-	auth     *auth.JWT
+	jwt      *auth.JWT
+	auth     map[string]auth.Authenticator
 
 	address           string
 	readHeaderTimeout time.Duration
@@ -37,10 +38,13 @@ type Server struct {
 }
 
 // NewServer ...
-func NewServer(provider *provider.Provider, auth *auth.JWT, options ...OptionFunc) *Server {
+func NewServer(provider *provider.Provider, jwt *auth.JWT, options ...OptionFunc) *Server {
 	s := &Server{
-		provider:          provider,
-		auth:              auth,
+		provider: provider,
+		jwt:      jwt,
+		auth: map[string]auth.Authenticator{
+			"jwt": jwt,
+		},
 		address:           defaultAddress,
 		readHeaderTimeout: defaultReadHeaderTimeout,
 		mux:               chi.NewRouter(),
@@ -98,7 +102,7 @@ func (s *Server) initRoutes() {
 		r.Post("/login", s.handleLogin)
 
 		r.Group(func(r chi.Router) {
-			r.Use(middlewares.JWTAuth(s.auth))
+			r.Use(middlewares.Authenticate(s.auth))
 
 			r.Get("/projects", s.handleListProjects)
 			r.Post("/projects", s.handleCreateProject)

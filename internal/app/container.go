@@ -121,21 +121,21 @@ func (c *container) Provider() *provider.Provider {
 	return c.provider
 }
 
-func (c *container) Auth() *auth.JWT {
+func (c *container) JWTAuth() *auth.JWT {
 	if c.auth == nil {
-		options := c.Config().Server.Auth
+		options := c.Config().Server.Auth.JWT
 
-		privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(options.JWT.PrivateKey))
+		privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(options.PrivateKey))
 		if err != nil {
 			fatal("failed to parse private key", err)
 		}
 
-		publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(options.JWT.PublicKey))
+		publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(options.PublicKey))
 		if err != nil {
 			fatal("failed to parse public key", err)
 		}
 
-		c.auth = auth.NewJWT(privateKey, publicKey, options.JWT.TTL)
+		c.auth = auth.NewJWT(privateKey, publicKey, options.TTL)
 	}
 
 	return c.auth
@@ -145,9 +145,10 @@ func (c *container) Server() *server.Server {
 	if c.server == nil {
 		options := c.Config().Server
 
-		c.server = server.NewServer(c.Provider(), c.Auth(),
+		c.server = server.NewServer(c.Provider(), c.JWTAuth(),
 			server.WithAddress(options.Address),
 			server.WithReadHeaderTimeout(options.ReadHeaderTimeout),
+			loadServerAuth(c),
 		)
 	}
 

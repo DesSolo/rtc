@@ -22,6 +22,10 @@ type Config struct {
 				PublicKey  string        `yaml:"public_key"`
 				TTL        time.Duration `yaml:"ttl"`
 			} `yaml:"jwt"`
+			Tokens map[string]struct {
+				Username string   `yaml:"username"`
+				Roles    []string `yaml:"roles"`
+			} `yaml:"tokens"`
 		} `yaml:"auth"`
 	} `yaml:"server"`
 	Storage struct {

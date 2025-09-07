@@ -65,6 +65,16 @@ server:
       # ttl for key
       ttl: 24h
 
+    # token settings options
+    #   example: Authorization: token ${TOKEN}
+    tokens:
+      # secret token
+      0b574a10-7484-49b5-85c8-058f8563c300:
+        # username for token
+        username: token_user
+        # token roles
+        roles: ["admin"]
+
 # storage settings block
 storage:
   # postgres connection dsn
