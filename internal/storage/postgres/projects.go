@@ -10,23 +10,24 @@ import (
 )
 
 // Projects ...
-func (s *Storage) Projects(ctx context.Context, limit, offset int) ([]*storage.Project, uint64, error) {
-	query := "SELECT id, name, description, created_at, COUNT(*) OVER() AS total FROM projects ORDER BY id DESC LIMIT $1 OFFSET $2"
+func (s *Storage) Projects(ctx context.Context, q string, limit, offset int) ([]*storage.Project, uint64, error) {
+	query := queryBuilder().
+		Select("id, name, description, created_at, COUNT(*) OVER() AS total").
+		From("projects").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		OrderBy("id DESC")
 
-	rows, err := s.manager.Conn(ctx).Query(ctx, query, limit, offset)
-	if err != nil {
-		return nil, 0, fmt.Errorf("pool.Query: %w", err)
+	if q != "" {
+		query = queryLike(query, "name", q)
 	}
-	defer rows.Close()
 
-	return scanProjectsWithTotal(rows) // nolint:errcheck
-}
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, 0, fmt.Errorf("query: %w", err)
+	}
 
-// SearchProjects ...
-func (s *Storage) SearchProjects(ctx context.Context, q string, limit, offset int) ([]*storage.Project, uint64, error) {
-	query := "SELECT id, name, description, created_at , COUNT(*) OVER() AS total FROM projects WHERE name LIKE '%' || $1 || '%' LIMIT $2 OFFSET $3"
-
-	rows, err := s.manager.Conn(ctx).Query(ctx, query, q, limit, offset)
+	rows, err := s.manager.Conn(ctx).Query(ctx, sql, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("pool.Query: %w", err)
 	}

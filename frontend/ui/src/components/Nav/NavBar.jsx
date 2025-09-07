@@ -16,7 +16,6 @@ const NavBar = ({ collapsed }) => {
 
     return (
         <Sider trigger={null} collapsible collapsed={collapsed}>
-            {/* Логотип */}
             <Flex justify="center" align="center" style={{ height: 64 }}>
                 <Text
                     style={{
@@ -31,7 +30,6 @@ const NavBar = ({ collapsed }) => {
                 </Text>
             </Flex>
 
-            {/* Меню */}
             <Menu
                 theme="dark"
                 mode="inline"
@@ -47,13 +45,17 @@ const NavBar = ({ collapsed }) => {
                         icon: <AuditOutlined />,
                         label: 'Audit logs',
                     },
+                    {
+                        key: '/users',
+                        icon: <UserOutlined />,
+                        label: 'Users',
+                    },
                 ]}
                 onClick={(e) => {
                     navigate(e.key);
                 }}
             />
 
-            {/* Информация о пользователе внизу */}
             <div
                 style={{
                     position: 'absolute',

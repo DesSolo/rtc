@@ -119,11 +119,29 @@ func convertAuditsToModels(audits []*storage.Audit) []*models.Audit {
 	return result
 }
 
+func convertUsersToModels(users []*storage.User) []*models.User {
+	result := make([]*models.User, 0, len(users))
+	for _, user := range users {
+		result = append(result, convertUserToModel(user))
+	}
+
+	return result
+}
+
 func convertUserToModel(user *storage.User) *models.User {
 	return &models.User{
 		Username:  user.Username,
 		IsEnabled: user.IsEnabled,
 		Roles:     user.Roles,
 		CreatedAt: user.CreatedAt,
+	}
+}
+
+func convertModelToUser(user *models.User, passwordHash string) *storage.User {
+	return &storage.User{
+		Username:     user.Username,
+		PasswordHash: passwordHash,
+		IsEnabled:    user.IsEnabled,
+		Roles:        user.Roles,
 	}
 }

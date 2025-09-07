@@ -6,6 +6,7 @@ import ConfigsList from "../../components/Configs/Detail.jsx";
 import Releases from "../Releases/index.jsx";
 import Audit from "../Audit/index.jsx";
 import Login from "../Login/index.jsx"
+import Users from "../Users/index.jsx";
 
 
 const Index = () => {
@@ -16,6 +17,7 @@ const Index = () => {
                 <Route path="projects/:project/releases" element={<Releases />} />
                 <Route path="projects/:project/envs/:environment/releases/:release/configs" element={<ConfigsList />} />
                 <Route path="audit" element={<Audit />} />
+                <Route path="/users" element={<Users />} />
             </Route>
 
             <Route path="login" element={<Login />} />

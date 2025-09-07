@@ -11,16 +11,7 @@ import (
 
 // Projects ...
 func (p *Provider) Projects(ctx context.Context, q string, limit, offset int) ([]*models.Project, uint64, error) {
-	if len(q) != 0 {
-		projects, total, err := p.storage.SearchProjects(ctx, q, limit, offset)
-		if err != nil {
-			return nil, 0, fmt.Errorf("storage.SearchProjects: %w", err)
-		}
-
-		return convertProjectsToModel(projects), total, nil
-	}
-
-	projects, total, err := p.storage.Projects(ctx, limit, offset)
+	projects, total, err := p.storage.Projects(ctx, q, limit, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("storage.Projects: %w", err)
 	}

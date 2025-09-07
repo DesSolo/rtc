@@ -11,27 +11,44 @@ import (
 )
 
 // Users ...
-func (s *Storage) Users(ctx context.Context, limit, offset int) ([]*storage.User, error) {
-	query := "SELECT id, username, password_hash, is_enabled, roles, created_at FROM users LIMIT $1 OFFSET $2"
+func (s *Storage) Users(ctx context.Context, q string, limit, offset int) ([]*storage.User, uint64, error) {
+	query := queryBuilder().
+		Select("id, username, password_hash, is_enabled, roles, created_at, COUNT(*) OVER()").
+		From("users").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		OrderBy("id DESC")
 
-	rows, err := s.manager.Conn(ctx).Query(ctx, query, limit, offset)
+	if q != "" {
+		query = queryLike(query, "username", q)
+	}
+
+	sql, args, err := query.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("pool.Query: %w", err)
+		return nil, 0, fmt.Errorf("query: %w", err)
+	}
+
+	rows, err := s.manager.Conn(ctx).Query(ctx, sql, args...)
+	if err != nil {
+		return nil, 0, fmt.Errorf("pool.Query: %w", err)
 	}
 	defer rows.Close()
 
-	var users []*storage.User
+	var (
+		users []*storage.User
+		total uint64
+	)
 
 	for rows.Next() {
 		var user storage.User
-		if err := rows.Scan(&user.ID, &user.PasswordHash, &user.IsEnabled, &user.Roles, &user.CreatedAt); err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
+		if err := rows.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.IsEnabled, &user.Roles, &user.CreatedAt, &total); err != nil {
+			return nil, 0, fmt.Errorf("rows.Scan: %w", err)
 		}
 
 		users = append(users, &user)
 	}
 
-	return users, nil
+	return users, total, nil
 
 }
 
@@ -54,7 +71,7 @@ func (s *Storage) User(ctx context.Context, username string) (*storage.User, err
 
 // CreateUser ...
 func (s *Storage) CreateUser(ctx context.Context, user *storage.User) error {
-	query := "INSERT INTO users (username, password_hash, is_enabled, roles) VALUES ($1, $2, $3) RETURNING id, created_at"
+	query := "INSERT INTO users (username, password_hash, is_enabled, roles) VALUES ($1, $2, $3, $4) RETURNING id, created_at"
 
 	if err := s.manager.Conn(ctx).QueryRow(ctx, query, user.Username, user.PasswordHash, user.IsEnabled, user.Roles).Scan(&user.ID, &user.CreatedAt); err != nil {
 		if isAlreadyExistsError(err) {
@@ -62,6 +79,17 @@ func (s *Storage) CreateUser(ctx context.Context, user *storage.User) error {
 		}
 
 		return fmt.Errorf("row.Scan: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateUser ...
+func (s *Storage) UpdateUser(ctx context.Context, id uint64, user *storage.User) error {
+	query := "UPDATE users SET password_hash=$1, is_enabled=$2, roles=$3 WHERE id=$4"
+
+	if _, err := s.manager.Conn(ctx).Exec(ctx, query, user.PasswordHash, user.IsEnabled, user.Roles, id); err != nil {
+		return fmt.Errorf("pool.Exec: %w", err)
 	}
 
 	return nil

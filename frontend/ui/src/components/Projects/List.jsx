@@ -81,6 +81,10 @@ const ProjectsList = () => {
         return () => clearTimeout(t);
     }, [searchValue]);
 
+    useEffect(() => {
+        setTitle("Projects")
+    })
+
     const columns = [
         {
             title: "Name",

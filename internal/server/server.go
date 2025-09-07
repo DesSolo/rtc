@@ -115,6 +115,10 @@ func (s *Server) initRoutes() {
 			r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
 
 			r.Get("/audits", s.handleListAudits)
+
+			r.Get("/users", s.handleListUsers)
+			r.Post("/users", s.handleCreateUser)
+			r.Patch("/users/{username}", s.handleUpdateUser)
 		})
 	})
 }

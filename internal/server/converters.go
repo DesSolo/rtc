@@ -116,3 +116,17 @@ func convertModelToAuth(user *models.User) *auth.Payload {
 		Roles:    user.Roles,
 	}
 }
+
+func convertModelsToUsers(users []*models.User) []user {
+	result := make([]user, 0, len(users))
+	for _, modelUser := range users {
+		result = append(result, user{
+			Username:  modelUser.Username,
+			IsEnabled: modelUser.IsEnabled,
+			Roles:     modelUser.Roles,
+			CreatedAt: modelUser.CreatedAt,
+		})
+	}
+
+	return result
+}
