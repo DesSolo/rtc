@@ -6,6 +6,7 @@ import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const EnvironmentsSelector = ({project, environment, onEnvChange, style, defaultEnvironment="prod"}) => {
     const [environments, setEnvironments] = useState([])
+    const navigate = useNavigate();
     const [currentEnvironment, setCurrentEnvironment] = useState(environment)
 
     useEffect(() => {
