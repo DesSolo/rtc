@@ -1,7 +1,9 @@
 import { Form, Input, message, notification } from "antd";
+import { useNavigate } from "react-router-dom";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
 const CreateProject = ({ onSuccess }) => {
+    const navigate = useNavigate();
     const [api, contextHolder] = notification.useNotification();
 
     const onFinish = async (values) => {
@@ -12,7 +14,7 @@ const CreateProject = ({ onSuccess }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(values),
-            });
+            }, navigate);
 
             if (!response.ok) {
                 const errorData = await response.json();

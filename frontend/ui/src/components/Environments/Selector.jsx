@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Radio } from "antd";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 
@@ -8,7 +9,7 @@ const EnvironmentsSelector = ({project, environment, onEnvChange, style, default
     const [currentEnvironment, setCurrentEnvironment] = useState(environment)
 
     useEffect(() => {
-        fetchWithAuth(`/api/v1/projects/${project}/envs`)
+        fetchWithAuth(`/api/v1/projects/${project}/envs`, {}, navigate)
             .then((response) => {
                 if (!response.ok) throw new Error("err");
                 return response.json();

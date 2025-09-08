@@ -1,4 +1,4 @@
-export const fetchWithAuth = (url, options = {}) => {
+export const fetchWithAuth = async (url, options = {}, navigate) => {
     const token = localStorage.getItem('token');
 
     const headers = {
@@ -6,5 +6,15 @@ export const fetchWithAuth = (url, options = {}) => {
         'Authorization': `jwt ${token}`
     };
 
-    return fetch(url, { ...options, headers });
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+        if (navigate) {
+            navigate('/login');
+        } else {
+            window.location.href = '/login';
+        }
+    }
+
+    return response;
 };

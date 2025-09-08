@@ -18,7 +18,7 @@ const ReleasesList = ({ project }) => {
 
     const fetchReleases = useCallback(async (environment) => {
         try {
-            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${environment}/releases`);
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${environment}/releases`, {}, navigate);
             if (!resp.ok) throw new Error(`status ${resp.status}`);
             const data = await resp.json();
             setReleases(data.data?.releases || []);
@@ -31,7 +31,7 @@ const ReleasesList = ({ project }) => {
         try {
             const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${env}/releases/${name}`, {
                 method: "DELETE",
-            });
+            }, navigate);
             if (!resp.ok) throw new Error(`status ${resp.status}`);
             api.success({ message: `Release ${name} deleted` });
             fetchReleases(env);

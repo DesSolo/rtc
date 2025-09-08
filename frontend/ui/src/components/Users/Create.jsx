@@ -1,8 +1,10 @@
 import {Button, Checkbox, Form, Input, message, notification, Space} from "antd";
+import { useNavigate } from "react-router-dom";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
 import {PlusOutlined, MinusCircleOutlined} from "@ant-design/icons";
 
 const CreateUser = ({ onSuccess }) => {
+    const navigate = useNavigate();
     const [api, contextHolder] = notification.useNotification();
 
     const onFinish = async (values) => {
@@ -13,7 +15,7 @@ const CreateUser = ({ onSuccess }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(values),
-            });
+            }, navigate);
 
             if (!response.ok) {
                 const errorData = await response.json();

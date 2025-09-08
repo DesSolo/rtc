@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LayoutWithNav from "../../components/Layout/Layout.jsx";
 import ProjectsList from "../../components/Projects/List.jsx";
@@ -10,6 +10,9 @@ import Users from "../Users/index.jsx";
 
 
 const Index = () => {
+    useEffect(()=>{
+        document.title = 'RTC'
+    })
     return (
         <Routes>
             <Route path="/" element={<LayoutWithNav />}>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {useOutletContext, useParams} from "react-router-dom";
+import {useNavigate, useOutletContext, useParams} from "react-router-dom";
 import {
     Card,
     Button,
@@ -61,6 +61,7 @@ const ConfigRow = ({ title, description, control, locked = false, query, isChang
 const ConfigsList = () => {
     const { setTitle } = useOutletContext();
     const { project, environment, release } = useParams();
+    const navigate = useNavigate();
     const groupRefs = useRef({});
     const highlightTimer = useRef(null);
     const [api, contextHolder] = notification.useNotification();
@@ -76,7 +77,7 @@ const ConfigsList = () => {
     // fetchConfigs — мемоизированная, чтобы не пересоздавать в эффектах
     const fetchConfigs = useCallback(async (env) => {
         try {
-            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${env}/releases/${release}/configs`);
+            const resp = await fetchWithAuth(`/api/v1/projects/${project}/envs/${env}/releases/${release}/configs`, {}, navigate);
             if (!resp.ok) throw new Error(`status ${resp.status}`);
             const data = await resp.json();
             const configsData = data.data?.configs || [];
@@ -127,7 +128,7 @@ const ConfigsList = () => {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(changes),
-            });
+            }, navigate);
             if (!resp.ok) {
                 api.error({ message: "Failed to update", description: String(resp.status) });
                 return;

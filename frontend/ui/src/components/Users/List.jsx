@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../../utils/fetchWithAuth.js";
 import { Button, Flex, Input, Modal, Switch, Table, message, Tag, Tooltip, Space } from "antd";
 import { PlusOutlined, UserOutlined } from "@ant-design/icons";
@@ -8,6 +9,7 @@ import { getUsername } from "../../utils/storage.js";
 
 const UsersList = () => {
     const { setTitle } = useOutletContext();
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [totalUsers, setTotalUsers] = useState(0);
@@ -123,7 +125,7 @@ const UsersList = () => {
             params.append('q', q);
         }
 
-        fetchWithAuth(`/api/v1/users?${params}`)
+        fetchWithAuth(`/api/v1/users?${params}`, {}, navigate)
             .then((response) => {
                 if (!response.ok) throw new Error("Ошибка загрузки данных");
                 return response.json();
@@ -185,7 +187,7 @@ const UsersList = () => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ is_enabled: enabled }),
-        })
+        }, navigate)
         .then((response) => {
             if (!response.ok) throw Error("error")
 

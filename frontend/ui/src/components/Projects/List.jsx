@@ -35,7 +35,7 @@ const ProjectsList = () => {
         setLoading(true);
         try {
             const uri = `/api/v1/projects?limit=${pageSize}&offset=${(page - 1) * pageSize}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-            const res = await fetchWithAuth(uri);
+            const res = await fetchWithAuth(uri, {}, navigate);
             if (!res.ok) throw new Error(res.statusText);
             const json = await res.json();
             setData(json.data.projects || []);

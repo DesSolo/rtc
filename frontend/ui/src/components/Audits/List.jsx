@@ -1,4 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Card,
     Input,
@@ -128,6 +129,7 @@ const AuditCard = ({row}) => {
 };
 
 const AuditList = () => {
+    const navigate = useNavigate();
     const [audits, setAudits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [limit, setLimit] = useState('50');
@@ -142,7 +144,7 @@ const AuditList = () => {
             if (limit) params.set('limit', String(Number(limit) || 50));
             if (query) params.set('q', query);
 
-            const res = await fetchWithAuth(`/api/v1/audits?${params.toString()}`);
+            const res = await fetchWithAuth(`/api/v1/audits?${params.toString()}`, {}, navigate);
             if (!res.ok) throw new Error('fetch error');
             const json = await res.json();
             setAudits(json.data?.audits || []);
