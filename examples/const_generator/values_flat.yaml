@@ -1,0 +1,4 @@
+# example 1: flat struct
+some_example_feature_key1:
+  usage: This is my awesome feature description1
+  some_another_sub_key: "generator ignore this"

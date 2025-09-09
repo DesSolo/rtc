@@ -1,0 +1,6 @@
+# example 2: nested struct
+foo:
+  bar:
+    baz:
+      some_example_feature_key2:
+        usage: This is my awesome feature description2
