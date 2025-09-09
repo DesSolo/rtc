@@ -53,5 +53,8 @@ clear-release:
 build-ui:
 	cd frontend/ui && npm run build
 
-build-app: build-ui
+build-server: build-ui
 	go build -o ${RELEASE_DIRECTORY}/${PROJECT_NAME} ${MAIN_FILE_PATH}
+
+build-generator:
+	go build -o ${RELEASE_DIRECTORY}/const_generator cmd/generator/main.go
