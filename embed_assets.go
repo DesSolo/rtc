@@ -1,3 +1,7 @@
+/*
+	This file is intended to be embedded into the user interface binary file.
+*/
+
 package assets
 
 import "embed"

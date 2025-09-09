@@ -29,7 +29,7 @@ type container struct {
 	storage       storage.Storage
 	valuesStorage storage.ValuesStorage
 	provider      *provider.Provider
-	auth          *auth.JWT // TODO: interface and tokens support
+	jwtAuth       *auth.JWT
 	server        *server.Server
 }
 
@@ -122,7 +122,7 @@ func (c *container) Provider() *provider.Provider {
 }
 
 func (c *container) JWTAuth() *auth.JWT {
-	if c.auth == nil {
+	if c.jwtAuth == nil {
 		options := c.Config().Server.Auth.JWT
 
 		privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(options.PrivateKey))
@@ -135,10 +135,10 @@ func (c *container) JWTAuth() *auth.JWT {
 			fatal("failed to parse public key", err)
 		}
 
-		c.auth = auth.NewJWT(privateKey, publicKey, options.TTL)
+		c.jwtAuth = auth.NewJWT(privateKey, publicKey, options.TTL)
 	}
 
-	return c.auth
+	return c.jwtAuth
 }
 
 func (c *container) Server() *server.Server {
