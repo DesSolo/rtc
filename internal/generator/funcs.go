@@ -6,8 +6,9 @@ import (
 	"unicode"
 )
 
+// ParseWithFunctions ...
 func ParseWithFunctions(text string) (*template.Template, error) {
-	return template.New("").Funcs(advancedFunctions).Parse(text)
+	return template.New("").Funcs(advancedFunctions).Parse(text) // nolint:wrapcheck
 }
 
 var advancedFunctions = template.FuncMap{

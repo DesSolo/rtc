@@ -45,7 +45,7 @@ func (p *Yaml) Parse(src []byte) ([]*generator.Config, error) {
 }
 
 func (p *Yaml) configsFromNode(root node) ([]*generator.Config, error) {
-	var configs []*generator.Config
+	configs := make([]*generator.Config, 0, len(root))
 
 	for key, value := range root {
 		val, ok := value.(node)

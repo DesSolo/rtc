@@ -1,0 +1,6 @@
+example_key:
+  usage: This is example_key usage
+  group: "tech"
+  value: "some string value"
+  type: string
+  writable: true

@@ -56,7 +56,7 @@ func New(parser Parser, options ...OptionFunc) *Generator {
 
 // Generate ...
 func (g *Generator) Generate(filePath string) error {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) // nolint:gosec
 	if err != nil {
 		return fmt.Errorf("os.ReadFile %s: %w", filePath, err)
 	}
@@ -71,7 +71,7 @@ func (g *Generator) Generate(filePath string) error {
 		return fmt.Errorf("template.Execute: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(g.targetPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(g.targetPath), 0750); err != nil {
 		return fmt.Errorf("os.MkdirAll: %w", err)
 	}
 

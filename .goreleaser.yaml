@@ -1,0 +1,50 @@
+version: 2
+
+before:
+  hooks:
+    - make tidy
+    - make build-ui
+
+builds:
+  - id: rtcserver
+    main: cmd/server/main.go
+    goos:
+      - linux
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+
+  - id: rtcctl
+    main: cmd/ctl/main.go
+    binary: rtcctl
+    goos:
+      - linux
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+
+  - id: rtcconst
+    main: cmd/generator/main.go
+    binary: rtcconst
+    goos:
+      - linux
+      - darwin
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+
+archives:
+  - formats: zip
+    allow_different_binary_count: true
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^scripts:'

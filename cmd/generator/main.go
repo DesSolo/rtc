@@ -55,6 +55,6 @@ func main() {
 }
 
 func fatal(message string, args ...any) {
-	fmt.Printf(message+"\n", args...)
+	fmt.Fprintf(os.Stderr, message+"\n", args...)
 	os.Exit(1)
 }
