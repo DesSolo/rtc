@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -135,7 +136,9 @@ func (s *Server) initUI() error {
 	fileServer := http.FileServer(http.FS(sub))
 
 	s.mux.Handle("/ui/*", http.StripPrefix("/ui", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Пытаемся обслужить статический файл
+		if !strings.Contains(r.URL.Path, ".") {
+			r.URL.Path = "/"
+		}
 
 		fileServer.ServeHTTP(w, r)
 	})))
