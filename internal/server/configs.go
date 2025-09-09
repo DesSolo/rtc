@@ -132,6 +132,11 @@ func (s *Server) handleUpsertConfigs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.provider.UpsertConfigs(ctx, projectName, envName, releaseName, convertConfigsToModels(req)); err != nil {
+		if errors.Is(err, provider.ErrNotFound) {
+			respondError(ctx, w, http.StatusNotFound, err.Error())
+			return
+		}
+
 		if errors.Is(err, provider.ErrNotValid) {
 			respondError(ctx, w, http.StatusBadRequest, err.Error())
 			return

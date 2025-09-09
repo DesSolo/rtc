@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
@@ -42,6 +43,9 @@ func (s *Storage) ProjectByName(ctx context.Context, name string) (*storage.Proj
 
 	var project storage.Project
 	if err := s.manager.Conn(ctx).QueryRow(ctx, query, name).Scan(&project.ID, &project.Name, &project.Description, &project.CreatedAt); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, storage.ErrNotFound
+		}
 		return nil, fmt.Errorf("rows.Scan: %w", err)
 	}
 

@@ -58,3 +58,6 @@ build-server: build-ui
 
 build-generator:
 	go build -o ${RELEASE_DIRECTORY}/const_generator cmd/generator/main.go
+
+build-ctl:
+	go build -o ${RELEASE_DIRECTORY}/rtcctl cmd/ctl/main.go
