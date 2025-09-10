@@ -124,6 +124,8 @@ func (s *Server) initRoutes() {
 			r.Post("/users", s.handleCreateUser)
 			r.Patch("/users/{username}", s.handleUpdateUser)
 		})
+
+		r.Get("/health", s.handleHealth)
 	})
 }
 
