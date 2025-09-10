@@ -58,7 +58,9 @@ curl -O https://github.com/DesSolo/rtc/blob/master/examples/config.yaml
 ```
 
 4. **You're all set!** 🎉
-Open your browser and go to `http://localhost:8080` to access the RTC management interface.
+Open your browser and go to `http://localhost:8080/ui` to access the RTC management interface.
+
+Default credentials: username `admin` password `rtc`
 
 ---
 
