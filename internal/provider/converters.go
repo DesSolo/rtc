@@ -105,6 +105,15 @@ func convertModelsToConfigs(configs []*models.Config, releaseID uint64) []*stora
 	return storageConfigs
 }
 
+func convertModelToAuditFilter(filter models.AuditFilter) storage.AuditFilter {
+	return storage.AuditFilter{
+		Action:   string(filter.Action),
+		Actor:    filter.Actor,
+		FromDate: filter.FromDate,
+		ToDate:   filter.ToDate,
+	}
+}
+
 func convertAuditsToModels(audits []*storage.Audit) []*models.Audit {
 	result := make([]*models.Audit, 0, len(audits))
 	for _, audit := range audits {

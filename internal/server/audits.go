@@ -22,9 +22,12 @@ type listAuditsResponse struct {
 func (s *Server) handleListAudits(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	now := time.Now().UTC()
+
 	queryAction := queryOr(r, "action", "config_updated")
-	limit := queryOr(r, "limit", 100)
-	offset := queryOr(r, "offset", 0)
+	actor := queryOr(r, "actor", "")
+	fromDate := queryOr(r, "from", now.Add(-24*time.Hour))
+	toDate := queryOr(r, "to", now)
 
 	action := models.ConvertAuditActionToModel(queryAction)
 	if action == models.AuditActionUnknown {
@@ -32,7 +35,12 @@ func (s *Server) handleListAudits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	audits, err := s.provider.Audits(ctx, action, limit, offset)
+	audits, err := s.provider.AuditsSearch(ctx, models.AuditFilter{
+		Action:   action,
+		Actor:    actor,
+		FromDate: fromDate,
+		ToDate:   toDate,
+	})
 	if err != nil {
 		slog.ErrorContext(ctx, "provider.Audits", "err", err, "action", action)
 		respondError(ctx, w, http.StatusInternalServerError, err.Error())

@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useCallback, useRef} from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Card,
@@ -10,9 +10,15 @@ import {
     Button,
     Row,
     Col,
+    DatePicker,
+    Select,
 } from "antd";
 import {SearchOutlined, ReloadOutlined} from "@ant-design/icons";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
+import dayjs from "dayjs";
+
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const decodePayload = (payload) => {
     try {
@@ -79,23 +85,35 @@ const PrettyPayload = ({payload}) => {
     );
 };
 
-const Header = ({onRefresh, limit, setLimit, query, setQuery, loading}) => (
+const Header = ({onRefresh, actor, setActor, action, setAction, dateRange, setDateRange, loading}) => (
     <Row gutter={[8, 8]} align="middle" style={{marginBottom: 12}}>
         <Col xs={24} sm={12} md={8} lg={6}>
             <Input
-                placeholder="Search by actor / action / project"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by actor"
+                value={actor}
+                onChange={(e) => setActor(e.target.value)}
                 prefix={<SearchOutlined />}
                 allowClear
             />
         </Col>
 
         <Col xs={12} sm={6} md={4} lg={3}>
-            <Input
-                placeholder="limit"
-                value={limit}
-                onChange={(e) => setLimit(e.target.value.replace(/[^0-9]/g, ""))}
+            <Select
+                value={action}
+                onChange={setAction}
+                style={{width: '100%'}}
+            >
+                <Option value="config_updated">Config Updated</Option>
+                {/* Добавьте другие варианты действий при необходимости */}
+            </Select>
+        </Col>
+
+        <Col xs={24} sm={12} md={8} lg={8}>
+            <RangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                format="YYYY-MM-DD"
+                style={{width: '100%'}}
             />
         </Col>
 
@@ -132,17 +150,22 @@ const AuditList = () => {
     const navigate = useNavigate();
     const [audits, setAudits] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [limit, setLimit] = useState('50');
-    const [query, setQuery] = useState('');
+    const [actor, setActor] = useState('');
+    const [action, setAction] = useState('config_updated');
+    const [dateRange, setDateRange] = useState([dayjs().subtract(1, 'day'), dayjs()]);
     const [error, setError] = useState(null);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const params = new URLSearchParams();
-            if (limit) params.set('limit', String(Number(limit) || 50));
-            if (query) params.set('q', query);
+            params.set('action', action);
+            if (actor) params.set('actor', actor);
+
+            const [from, to] = dateRange;
+            params.set('from', from.startOf('day').format('YYYY-MM-DDTHH:mm:ssZ'));
+            params.set('to', to.endOf('day').format('YYYY-MM-DDTHH:mm:ssZ'));
 
             const res = await fetchWithAuth(`/api/v1/audits?${params.toString()}`, {}, navigate);
             if (!res.ok) throw new Error('fetch error');
@@ -154,22 +177,38 @@ const AuditList = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [actor, action, dateRange, navigate]);
+
+    const fetchDataRef = useRef(fetchData);
+    fetchDataRef.current = fetchData;
 
     useEffect(() => {
-        fetchData();
+        fetchDataRef.current();
     }, []);
 
     useEffect(() => {
         const t = setTimeout(() => {
-            fetchData();
+            fetchDataRef.current();
         }, 400);
         return () => clearTimeout(t);
-    }, [limit, query]);
+    }, [actor]);
+
+    useEffect(() => {
+        fetchDataRef.current();
+    }, [action, dateRange]);
 
     return (
         <div>
-            <Header onRefresh={fetchData} limit={limit} setLimit={setLimit} query={query} setQuery={setQuery} loading={loading} />
+            <Header
+                onRefresh={fetchData}
+                actor={actor}
+                setActor={setActor}
+                action={action}
+                setAction={setAction}
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                loading={loading}
+            />
 
             {loading && <Spin style={{display: 'block', margin: '24px auto'}} />}
 

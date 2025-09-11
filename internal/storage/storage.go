@@ -30,7 +30,7 @@ type Storage interface {
 	MarkConfigsUpdated(ctx context.Context, IDs []uint64) error
 	DeleteConfigs(ctx context.Context, IDs []uint64) error
 
-	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
+	AuditsSearch(ctx context.Context, filter AuditFilter) ([]*Audit, error)
 	AddAuditRecord(ctx context.Context, audit *Audit) error
 
 	Users(ctx context.Context, q string, limit, offset uint64) ([]*User, uint64, error)

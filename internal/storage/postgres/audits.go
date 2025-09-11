@@ -4,28 +4,49 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
+
 	"rtc/internal/storage"
 )
 
-// AuditsByAction ...
-func (s *Storage) AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*storage.Audit, error) {
-	query := "SELECT id, action, actor, payload, ts FROM audit_log WHERE action = $1 ORDER BY id DESC LIMIT $2 OFFSET $3"
+// AuditsSearch ...
+func (s *Storage) AuditsSearch(ctx context.Context, filter storage.AuditFilter) ([]*storage.Audit, error) {
+	query := queryBuilder().Select("id, action, actor, payload, ts").
+		From("audit_log").
+		Where(squirrel.GtOrEq{"ts": filter.FromDate}).
+		Where(squirrel.LtOrEq{"ts": filter.ToDate})
 
-	rows, err := s.manager.Conn(ctx).Query(ctx, query, action, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("pool.Query: %w", err)
+	if filter.Action != "" {
+		query = query.Where(squirrel.Eq{"action": filter.Action})
 	}
-	defer rows.Close()
+
+	if filter.Actor != "" {
+		query = query.Where(squirrel.Eq{"actor": filter.Actor})
+	}
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("toSql: %w", err)
+	}
 
 	var audits []*storage.Audit
+
+	rows, err := s.manager.Conn(ctx).Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var audit storage.Audit
 		if err := rows.Scan(&audit.ID, &audit.Action, &audit.Actor, &audit.Payload, &audit.Ts); err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
+			return nil, fmt.Errorf("scan: %w", err)
 		}
-
 		audits = append(audits, &audit)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows: %w", err)
 	}
 
 	return audits, nil

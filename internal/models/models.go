@@ -89,6 +89,14 @@ type Audit struct {
 	Ts      time.Time
 }
 
+// AuditFilter ...
+type AuditFilter struct {
+	Action   AuditAction
+	Actor    string
+	FromDate time.Time
+	ToDate   time.Time
+}
+
 // User ...
 type User struct {
 	Username  string
