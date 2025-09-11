@@ -5,7 +5,7 @@ import { Button, Flex, Input, Modal, Switch, Table, message, Tag, Tooltip, Space
 import { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import { useOutletContext, useSearchParams } from "react-router-dom";
 import CreateUser from "./Create.jsx";
-import { getUsername } from "../../utils/storage.js";
+import {getUsername, hasRole} from "../../utils/storage.js";
 
 const UsersList = () => {
     const { setTitle } = useOutletContext();
@@ -220,13 +220,11 @@ const UsersList = () => {
                     style={{ marginRight: 16, width: 200 }}
                     allowClear
                 />
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    New User
-                </Button>
+                {hasRole('admin') && (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                        New
+                    </Button>
+                )}
             </Flex>
 
             <Table

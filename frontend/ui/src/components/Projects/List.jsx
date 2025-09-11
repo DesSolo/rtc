@@ -213,11 +213,12 @@ const ProjectsList = () => {
                     placeholder="Search"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    style={{ marginRight: 16 }}
                 />
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-                    New
-                </Button>
+                {hasRole('admin') && (
+                    <Button style={{marginLeft: 16}} type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                        New
+                    </Button>
+                )}
             </Flex>
 
             <Table
