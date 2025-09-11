@@ -4,6 +4,7 @@ import EnvironmentsSelector from "../Environments/Selector.jsx";
 import { Button, Table, Flex, Popconfirm, notification } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
+import {hasRole} from "../../utils/storage.js";
 
 const ReleasesList = ({ project }) => {
     const { setTitle } = useOutletContext();
@@ -64,7 +65,7 @@ const ReleasesList = ({ project }) => {
             key: "created",
             render: (text) => new Date(text).toLocaleString(),
         },
-        {
+        ...(hasRole('admin') ? [{
             title: "Actions",
             key: "actions",
             render: (release) => (
@@ -79,7 +80,7 @@ const ReleasesList = ({ project }) => {
                     </Popconfirm>
                 </Flex>
             ),
-        },
+        }]: []),
     ];
 
     return (

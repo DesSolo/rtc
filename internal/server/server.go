@@ -107,6 +107,8 @@ func (s *Server) initRoutes() {
 
 			r.Get("/projects", s.handleListProjects)
 			r.Post("/projects", s.handleCreateProject)
+			r.Put("/projects/{projectName}", s.handleUpdateProject)
+			r.Delete("/projects/{projectName}", s.handleDeleteProject)
 
 			r.Get("/projects/{projectName}/envs", s.handleListEnvironments)
 
@@ -119,6 +121,7 @@ func (s *Server) initRoutes() {
 			r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
 
 			r.Get("/audits", s.handleListAudits)
+			r.Get("/audits/actions", s.handleAuditActions)
 
 			r.Get("/users", s.handleListUsers)
 			r.Post("/users", s.handleCreateUser)

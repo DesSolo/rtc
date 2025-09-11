@@ -12,6 +12,7 @@ import {
     Col,
     DatePicker,
     Select,
+    Descriptions
 } from "antd";
 import {SearchOutlined, ReloadOutlined} from "@ant-design/icons";
 import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
@@ -62,30 +63,62 @@ const DiffLine = ({label, oldValue, newValue}) => {
     );
 };
 
-const PrettyPayload = ({payload}) => {
-    const decoded = useMemo(() => decodePayload(payload), [payload]);
-    if (!decoded) return <div>Invalid payload</div>;
+// Компонент для изменений конфигурации
+const ConfigUpdatedPayload = ({decoded}) => (
+    <Space direction="vertical" size={12} style={{width: "100%"}}>
+        <div>
+            <Tag>env: {decoded.environment || "-"}</Tag>
+            <Tag>project: {decoded.project || "-"}</Tag>
+            <Tag>release: {decoded.release || "-"}</Tag>
+        </div>
+
+        <div style={{display: "grid", gap: 12}}>
+            {(decoded.items || []).map((it, i) => (
+                <DiffLine key={i} label={it.key} oldValue={it.old_value} newValue={it.new_value} />
+            ))}
+        </div>
+    </Space>
+);
+
+const DefaultPayload = ({decoded}) => {
+    const entries = Object.entries(decoded || {}).filter(([key]) => key !== 'version');
 
     return (
-        <div className="audit-payload">
-            <Space direction="vertical" size={12} style={{width: "100%"}}>
-                <div>
-                    <Tag>env: {decoded.environment || "-"}</Tag>
-                    <Tag>project: {decoded.project || "-"}</Tag>
-                    <Tag>release: {decoded.release || "-"}</Tag>
-                </div>
+        <Descriptions
+            column={1}
+            bordered
+            size="small"
+            labelStyle={{ fontWeight: 'bold', width: '120px' }}
+        >
+            {entries.map(([key, value]) => {
+                let displayValue = value;
+                if (typeof value === 'object' && value !== null) {
+                    displayValue = JSON.stringify(value, null, 2);
+                }
 
-                <div style={{display: "grid", gap: 12}}>
-                    {(decoded.items || []).map((it, i) => (
-                        <DiffLine key={i} label={it.key} oldValue={it.old_value} newValue={it.new_value} />
-                    ))}
-                </div>
-            </Space>
-        </div>
+                return (
+                    <Descriptions.Item key={key} label={key}>
+                        {String(displayValue)}
+                    </Descriptions.Item>
+                );
+            })}
+        </Descriptions>
     );
 };
 
-const Header = ({onRefresh, actor, setActor, action, setAction, dateRange, setDateRange, loading}) => (
+const PrettyPayload = ({payload, action}) => {
+    const decoded = useMemo(() => decodePayload(payload), [payload]);
+    if (!decoded) return <div>Invalid payload</div>;
+
+    switch (action) {
+        case 'config_updated':
+            return <ConfigUpdatedPayload decoded={decoded} />;
+        default:
+            return <DefaultPayload decoded={decoded} />;
+    }
+};
+
+const Header = ({onRefresh, actor, setActor, action, setAction, dateRange, setDateRange, loading, actions}) => (
     <Row gutter={[8, 8]} align="middle" style={{marginBottom: 12}}>
         <Col xs={24} sm={12} md={8} lg={6}>
             <Input
@@ -102,9 +135,12 @@ const Header = ({onRefresh, actor, setActor, action, setAction, dateRange, setDa
                 value={action}
                 onChange={setAction}
                 style={{width: '100%'}}
+                loading={loading}
             >
-                <Option value="config_updated">Config Updated</Option>
-                {/* Добавьте другие варианты действий при необходимости */}
+                <Option value="">All Actions</Option>
+                {actions.map(action => (
+                    <Option key={action} value={action}>{action}</Option>
+                ))}
             </Select>
         </Col>
 
@@ -127,7 +163,6 @@ const Header = ({onRefresh, actor, setActor, action, setAction, dateRange, setDa
 
 const AuditCard = ({row}) => {
     const payload = row.payload;
-    const decoded = decodePayload(payload);
 
     const actor = row.actor || "UNKNOWN";
     const ts = row.ts ? new Date(row.ts).toLocaleString() : "-";
@@ -136,11 +171,11 @@ const AuditCard = ({row}) => {
         <Card
             size="small"
             style={{marginBottom: 12}}
-            title={<span>{row.action} <span style={{color: 'var(--ant-gray-6)', marginLeft: 8}}> | {actor}</span></span>}
+            title={<span>{row.action} <span style={{color: 'var(--ant-gray-6)'}}> | {actor}</span></span>}
             extra={<small style={{color: 'var(--ant-gray-6)'}}>{ts}</small>}
         >
             <div style={{display: 'flex', gap: 12, flexDirection: 'column'}}>
-                <PrettyPayload payload={payload} />
+                <PrettyPayload payload={payload} action={row.action} />
             </div>
         </Card>
     );
@@ -150,8 +185,10 @@ const AuditList = () => {
     const navigate = useNavigate();
     const [audits, setAudits] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [actionsLoading, setActionsLoading] = useState(false);
     const [actor, setActor] = useState('');
-    const [action, setAction] = useState('config_updated');
+    const [action, setAction] = useState('');
+    const [actions, setActions] = useState([]);
     const [dateRange, setDateRange] = useState([dayjs().subtract(1, 'day'), dayjs()]);
     const [error, setError] = useState(null);
 
@@ -160,7 +197,7 @@ const AuditList = () => {
         setError(null);
         try {
             const params = new URLSearchParams();
-            params.set('action', action);
+            if (action) params.set('action', action);
             if (actor) params.set('actor', actor);
 
             const [from, to] = dateRange;
@@ -179,11 +216,28 @@ const AuditList = () => {
         }
     }, [actor, action, dateRange, navigate]);
 
+    const fetchActions = useCallback(async () => {
+        setActionsLoading(true);
+        setError(null);
+        try {
+            const res = await fetchWithAuth("/api/v1/audits/actions", {}, navigate);
+            if (!res.ok) throw new Error('fetch error');
+            const json = await res.json();
+            setActions(json.data || []);
+        } catch (e) {
+            setError('Failed to load actions');
+            setActions([]);
+        } finally {
+            setActionsLoading(false);
+        }
+    }, [navigate]);
+
     const fetchDataRef = useRef(fetchData);
     fetchDataRef.current = fetchData;
 
     useEffect(() => {
         fetchDataRef.current();
+        fetchActions();
     }, []);
 
     useEffect(() => {
@@ -207,14 +261,15 @@ const AuditList = () => {
                 setAction={setAction}
                 dateRange={dateRange}
                 setDateRange={setDateRange}
-                loading={loading}
+                loading={loading || actionsLoading}
+                actions={actions}
             />
 
-            {loading && <Spin style={{display: 'block', margin: '24px auto'}} />}
+            {(loading || actionsLoading) && <Spin style={{display: 'block', margin: '24px auto'}} />}
 
             {error && <div style={{color: 'var(--ant-error-color)', marginBottom: 12}}>{error}</div>}
 
-            {!loading && audits.length === 0 && <Empty description="No audits" />}
+            {!loading && !actionsLoading && audits.length === 0 && <Empty description="No audits" />}
 
             {audits.map((row, idx) => (
                 <AuditCard key={row.id || idx} row={row} />

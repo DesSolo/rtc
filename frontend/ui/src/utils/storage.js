@@ -4,11 +4,11 @@ export const getJWT = () => {
 }
 
 export const getUsername = () => {
-    return getJWT()['Username']
+    return getJWT()?.Username
 }
 
 export const getRoles = () => {
-    return getJWT()['Roles']
+    return getJWT()?.Roles
 }
 
 export const hasRole = (name) => {

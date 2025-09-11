@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"rtc/internal/auth"
 	"rtc/internal/models"
 	"rtc/internal/storage"
 )
@@ -39,6 +40,12 @@ func (p *Provider) DeleteRelease(ctx context.Context, projectName, envName, rele
 		return fmt.Errorf("storage.Environment: %w", err)
 	}
 
+	actor := auth.UsernameFromContext(ctx)
+	auditRecord, err := encodeAuditRecordReleaseDeleted(actor, projectName, envName, releaseName)
+	if err != nil {
+		return fmt.Errorf("encodeAuditRecordReleaseDeleted: %w", err)
+	}
+
 	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := p.storage.DeleteRelease(ctx, env.ID, releaseName); err != nil {
 			return fmt.Errorf("storage.DeleteRelease: %w", err)
@@ -46,6 +53,10 @@ func (p *Provider) DeleteRelease(ctx context.Context, projectName, envName, rele
 
 		if err := p.valuesStorage.DeleteValuesByPath(ctx, formatValuesStoragePath(projectName, envName, releaseName)); err != nil {
 			return fmt.Errorf("storage.DeleteValues: %w", err)
+		}
+
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.AddAuditRecord: %w", err)
 		}
 
 		return nil

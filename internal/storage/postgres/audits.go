@@ -14,7 +14,8 @@ func (s *Storage) AuditsSearch(ctx context.Context, filter storage.AuditFilter) 
 	query := queryBuilder().Select("id, action, actor, payload, ts").
 		From("audit_log").
 		Where(squirrel.GtOrEq{"ts": filter.FromDate}).
-		Where(squirrel.LtOrEq{"ts": filter.ToDate})
+		Where(squirrel.LtOrEq{"ts": filter.ToDate}).
+		OrderBy("id DESC")
 
 	if filter.Action != "" {
 		query = query.Where(squirrel.Eq{"action": filter.Action})

@@ -29,6 +29,14 @@ func ConvertAuditActionToModel(auditAction string) AuditAction {
 	switch auditAction {
 	case "config_updated":
 		return AuditActionConfigUpdated
+	case "project_created":
+		return AuditActionProjectCreated
+	case "project_updated":
+		return AuditActionProjectUpdated
+	case "project_deleted":
+		return AuditActionProjectDeleted
+	case "release_deleted":
+		return AuditActionReleaseDeleted
 	default:
 		return AuditActionUnknown
 	}
