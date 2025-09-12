@@ -65,7 +65,7 @@ clear-release:
 	rm -rf ${RELEASE_DIRECTORY}
 
 build-ui:
-	cd cd ${FRONTEND_PATH} && npm run build
+	cd ${FRONTEND_PATH} && npm run build
 
 build-server: build-ui
 	go build -o ${RELEASE_DIRECTORY}/${PROJECT_NAME} ${MAIN_FILE_PATH}
