@@ -74,6 +74,18 @@ server:
         username: token_user
         # token roles
         roles: ["admin"]
+  # server authorization
+  authorizer:
+    # kind of authorizer
+    #    noop - allow any operations
+    #    rego - policy language https://www.openpolicyagent.org/docs/policy-language
+    kind: rego
+    # rego options (required if authorizer = rego)
+    rego:
+      # query argument from policy
+      query: data.authz.allow
+      # path for policy file
+      policy_path: examples/authz.rego
 
 # storage settings block
 storage:

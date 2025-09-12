@@ -130,3 +130,12 @@ func convertModelsToUsers(users []*models.User) []user {
 
 	return result
 }
+
+func convertModelsToAuditActions(actions []models.AuditAction) []string {
+	result := make([]string, 0, len(actions))
+	for _, modelAction := range actions {
+		result = append(result, string(modelAction))
+	}
+
+	return result
+}

@@ -1,9 +1,11 @@
-import { Button, Flex, Table, Modal, Input } from "antd";
+import { Button, Flex, Table, Modal, Input, Popconfirm, notification, Form, Input as AntdInput } from "antd";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined, UserOutlined, EditOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import CreateProject from "./Create.jsx";
 import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
-import {fetchWithAuth} from "../../utils/fetchWithAuth.js";
+import { fetchWithAuth } from "../../utils/fetchWithAuth.js";
+import { hasRole } from "../../utils/storage.js";
+
 
 const ProjectsList = () => {
     const { setTitle } = useOutletContext();
@@ -26,10 +28,39 @@ const ProjectsList = () => {
     });
     const [searchValue, setSearchValue] = useState(paramQ);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [api, contextHolder] = notification.useNotification();
 
     // Track last applied search value to avoid unnecessary URL updates
     const lastAppliedQRef = useRef(paramQ);
     const isFirstMount = useRef(true);
+
+    const [editingProject, setEditingProject] = useState(null);
+    const [editDescription, setEditDescription] = useState('');
+
+    const handleEdit = (project) => {
+        setEditingProject(project.name);
+        setEditDescription(project.description);
+    };
+
+    const handleSave = async (projectName) => {
+        try {
+            const resp = await fetchWithAuth(`/api/v1/projects/${projectName}`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ description: editDescription })
+            }, navigate);
+
+            if (!resp.ok) throw new Error(`status ${resp.status}`);
+
+            api.success({ message: `Project ${projectName} updated` });
+            setEditingProject(null);
+            fetchData(pagination.current, pagination.pageSize, lastAppliedQRef.current);
+        } catch (err) {
+            api.error({ message: "Failed to update project", description: String(err) });
+        }
+    };
 
     const fetchData = useCallback(async (page = 1, pageSize = 10, q = "") => {
         setLoading(true);
@@ -51,6 +82,19 @@ const ProjectsList = () => {
             setLoading(false);
         }
     }, []);
+
+    const deleteProject = useCallback(async (name) => {
+        try {
+            const resp = await fetchWithAuth(`/api/v1/projects/${name}`, {
+                method: "DELETE",
+            }, navigate);
+            if (!resp.ok) throw new Error(`status ${resp.status}`);
+            api.success({ message: `Project ${name} deleted` });
+            fetchData(paramPage, paramLimit, paramQ);
+        } catch (err) {
+            api.error({ message: "Failed to delete project", description: String(err) });
+        }
+    }, [api]);
 
     // Sync with URL parameters
     useEffect(() => {
@@ -92,13 +136,69 @@ const ProjectsList = () => {
             key: "name",
             render: (project) => <a onClick={() => navigateToReleases(project)}>{project}</a>,
         },
-        { title: "Description", dataIndex: "description", key: "description" },
+        {
+            title: "Description",
+            dataIndex: "description",
+            key: "description",
+            render: (text, record) => (
+                <Flex align="center" gap={8}>
+                    {editingProject === record.name ? (
+                        <>
+                            <AntdInput
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                style={{ marginRight: 8 }}
+                            />
+                            <Button
+                                type="primary"
+                                icon={<CheckOutlined />}
+                                size="small"
+                                onClick={() => handleSave(record.name)}
+                            />
+                            <Button
+                                icon={<CloseOutlined />}
+                                size="small"
+                                onClick={() => setEditingProject(null)}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            {text}
+                            {hasRole('admin') && (
+                                <Button
+                                    type="text"
+                                    icon={<EditOutlined />}
+                                    size="small"
+                                    onClick={() => handleEdit(record)}
+                                />
+                            )}
+                        </>
+                    )}
+                </Flex>
+            ),
+        },
         {
             title: "Created",
             dataIndex: "created_at",
             key: "created",
             render: (text) => <>{new Date(text).toLocaleString()}</>,
         },
+        ...(hasRole('admin') ? [{
+            title: "Actions",
+            key: "actions",
+            render: (project) => (
+                <Flex gap="project">
+                    <Popconfirm
+                        title={`Delete project ${project.name}?`}
+                        onConfirm={() => deleteProject(project.name)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button danger type="primary" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </Flex>
+            ),
+        }]: []),
     ];
 
     const navigateToReleases = (project) => {
@@ -107,16 +207,18 @@ const ProjectsList = () => {
 
     return (
         <>
+            {contextHolder}
             <Flex justify="space-between" style={{ marginBottom: 16 }}>
                 <Input
                     placeholder="Search"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    style={{ marginRight: 16 }}
                 />
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-                    New
-                </Button>
+                {hasRole('admin') && (
+                    <Button style={{marginLeft: 16}} type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                        New
+                    </Button>
+                )}
             </Flex>
 
             <Table

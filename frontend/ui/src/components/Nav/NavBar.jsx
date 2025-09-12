@@ -2,7 +2,7 @@ import { Flex, Layout, Menu, Typography, Avatar } from "antd";
 import {
     ProjectOutlined,
     AuditOutlined,
-    UserOutlined // 👈 Добавляем иконку пользователя
+    UserOutlined
 } from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
 import {getUsername, hasRole} from "../../utils/storage.js";
@@ -12,10 +12,10 @@ const { Sider } = Layout;
 
 const NavBar = ({ collapsed }) => {
     const navigate = useNavigate();
-    const username = getUsername(); // Получаем имя пользователя
+    const username = getUsername();
 
     return (
-        <Sider trigger={null} collapsible collapsed={collapsed}>
+        <Sider trigger={null} collapsible collapsed={collapsed} style={{ position: 'relative' }}>
             <Flex justify="center" align="center" style={{ height: 64 }}>
                 <Text
                     style={{
@@ -55,20 +55,21 @@ const NavBar = ({ collapsed }) => {
                     navigate(e.key);
                 }}
             />
-
             <div
                 style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     bottom: 0,
                     left: 0,
-                    right: 0,
+                    width: collapsed ? 80 : 200,
                     padding: '16px',
-                    backgroundColor: '#001529', // Цвет фона Sider в темной теме
+                    backgroundColor: '#001529',
                     borderTop: '1px solid #444',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 12,
                     color: 'white',
+                    transition: 'width 0.2s',
+                    zIndex: 1000
                 }}
             >
                 <Avatar icon={<UserOutlined />} size="small" />

@@ -13,6 +13,8 @@ type Storage interface {
 	Projects(ctx context.Context, q string, limit, offset uint64) ([]*Project, uint64, error)
 	ProjectByName(ctx context.Context, name string) (*Project, error)
 	CreateProject(ctx context.Context, project *Project) error
+	UpdateProject(ctx context.Context, project *Project) error
+	DeleteProject(ctx context.Context, ID uint64) error
 
 	Environments(ctx context.Context, projectName string) ([]*Environment, error)
 	Environment(ctx context.Context, projectID uint64, envName string) (*Environment, error)
@@ -30,7 +32,7 @@ type Storage interface {
 	MarkConfigsUpdated(ctx context.Context, IDs []uint64) error
 	DeleteConfigs(ctx context.Context, IDs []uint64) error
 
-	AuditsByAction(ctx context.Context, action string, limit, offset int) ([]*Audit, error)
+	AuditsSearch(ctx context.Context, filter AuditFilter) ([]*Audit, error)
 	AddAuditRecord(ctx context.Context, audit *Audit) error
 
 	Users(ctx context.Context, q string, limit, offset uint64) ([]*User, uint64, error)

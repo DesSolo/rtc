@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"rtc/internal/auth"
 	"rtc/internal/models"
 	"rtc/internal/storage"
 )
@@ -26,13 +27,104 @@ func (p *Provider) CreateProject(ctx context.Context, name, description string) 
 		Description: description,
 	}
 
-	if err := p.storage.CreateProject(ctx, project); err != nil {
-		if errors.Is(err, storage.ErrAlreadyExists) {
-			return nil, ErrAlreadyExists
+	actor := auth.UsernameFromContext(ctx)
+	auditRecord, err := encodeAuditRecordProjectCreated(actor, name, description)
+	if err != nil {
+		return nil, fmt.Errorf("encodeAuditRecordProjectCreated: %w", err)
+	}
+
+	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := p.storage.CreateProject(ctx, project); err != nil {
+			if errors.Is(err, storage.ErrAlreadyExists) {
+				return ErrAlreadyExists
+			}
+
+			return fmt.Errorf("storage.CreateProject: %w", err)
 		}
 
-		return nil, fmt.Errorf("storage.CreateProject: %w", err)
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.AddAuditRecord: %w", err)
+		}
+
+		return nil
+	})
+
+	if txErr != nil {
+		return nil, txErr // nolint:wrapcheck
 	}
 
 	return convertProjectToModel(project), nil
+}
+
+// UpdateProjectDescription ...
+func (p *Provider) UpdateProjectDescription(ctx context.Context, name, newDescription string) error {
+	project, err := p.storage.ProjectByName(ctx, name)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ErrNotFound
+		}
+
+		return fmt.Errorf("storage.ProjectByName: %w", err)
+	}
+
+	actor := auth.UsernameFromContext(ctx)
+	auditRecord, err := encodeAuditRecordProjectUpdated(actor, name, project.Description, newDescription)
+	if err != nil {
+		return fmt.Errorf("encodeAuditRecordProjectUpdated: %w", err)
+	}
+
+	project.Description = newDescription
+
+	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := p.storage.UpdateProject(ctx, project); err != nil {
+			return fmt.Errorf("storage.UpdateProject: %w", err)
+		}
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.AddAuditRecord: %w", err)
+		}
+
+		return nil
+	})
+
+	if txErr != nil {
+		return txErr // nolint:wrapcheck
+	}
+
+	return nil
+}
+
+// DeleteProject ...
+func (p *Provider) DeleteProject(ctx context.Context, name string) error {
+	project, err := p.storage.ProjectByName(ctx, name)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ErrNotFound
+		}
+
+		return fmt.Errorf("storage.ProjectByName: %w", err)
+	}
+
+	actor := auth.UsernameFromContext(ctx)
+	auditRecord, err := encodeAuditRecordProjectDeled(actor, name)
+	if err != nil {
+		return fmt.Errorf("encodeAuditRecordProjectDeled: %w", err)
+	}
+
+	txErr := p.storage.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := p.storage.DeleteProject(ctx, project.ID); err != nil {
+			return fmt.Errorf("storage.DeleteProject: %w", err)
+		}
+
+		if err := p.storage.AddAuditRecord(ctx, auditRecord); err != nil {
+			return fmt.Errorf("storage.AddAuditRecord: %w", err)
+		}
+
+		return nil
+	})
+
+	if txErr != nil {
+		return txErr // nolint:wrapcheck
+	}
+
+	return nil
 }

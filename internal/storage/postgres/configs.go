@@ -13,10 +13,10 @@ import (
 // Configs ...
 func (s *Storage) Configs(ctx context.Context, projectName, envName, releaseName string) ([]*storage.Config, error) {
 	query := `
-		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM configs c
-		JOIN releases r ON r.id = c.release_id
-		JOIN environments e ON e.id = r.environment_id
-		JOIN projects p ON p.id = e.project_id
+		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM projects p
+		JOIN environments e ON e.project_id = p.id
+		JOIN releases r ON r.environment_id = e.id
+		JOIN configs c ON c.release_id = r.id
 		WHERE p.name = $1 AND e.name = $2 AND r.name = $3
 		ORDER BY c.id ASC
 	`
@@ -44,10 +44,10 @@ func (s *Storage) Configs(ctx context.Context, projectName, envName, releaseName
 // ConfigsByKeys ...
 func (s *Storage) ConfigsByKeys(ctx context.Context, projectName, envName, releaseName string, keys []string) ([]*storage.Config, error) {
 	query := `
-		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM configs c
-		JOIN releases r ON r.id = c.release_id
-		JOIN environments e ON e.id = r.environment_id
-		JOIN projects p ON p.id = e.project_id
+		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM projects p
+		JOIN environments e ON e.project_id = p.id
+		JOIN releases r ON r.environment_id = e.id
+		JOIN configs c ON c.release_id = r.id
 		WHERE p.name = $1 AND e.name = $2 AND r.name = $3 AND c.key = ANY ($4)
 		ORDER BY c.id ASC
 	`
@@ -75,10 +75,10 @@ func (s *Storage) ConfigsByKeys(ctx context.Context, projectName, envName, relea
 // Config ...
 func (s *Storage) Config(ctx context.Context, projectName, envName, releaseName, key string) (*storage.Config, error) {
 	query := `
-		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM configs c
-		JOIN releases r ON r.id = c.release_id
-		JOIN environments e ON e.id = r.environment_id
-		JOIN projects p ON p.id = e.project_id
+		SELECT c.id, c.release_id, c.key, c.value_type, c.metadata, c.created_at, c.updated_at FROM projects p
+		JOIN environments e ON e.project_id = p.id
+		JOIN releases r ON r.environment_id = e.id
+		JOIN configs c ON c.release_id = r.id
 		WHERE p.name = $1 AND e.name = $2 AND r.name = $3 AND c.key = $4
 	`
 

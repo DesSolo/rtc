@@ -58,7 +58,9 @@ curl -O https://github.com/DesSolo/rtc/blob/master/examples/config.yaml
 ```
 
 4. **You're all set!** 🎉
-Open your browser and go to `http://localhost:8080` to access the RTC management interface.
+Open your browser and go to `http://localhost:8080/ui` to access the RTC management interface.
+
+Default credentials: username `admin` password `rtc`
 
 ---
 
@@ -76,3 +78,27 @@ Dive deeper into RTC with our detailed examples and documentation:
   - [Complete rtcctl Documentation](examples/rtcctl/README.md)
 
 We hope you enjoy using RTC! If you have any questions or feedback, feel free to reach out. 🌟
+
+---
+
+## Local run
+
+Dependencies:
+- docker
+- golang
+- npm
+
+```bash
+git clone https://github.com/DesSolo/rtc.git
+cd rtc
+# start storages (postgress and etcd)
+docker-compose run -d -f docker-compose.d/docker-compose.yaml
+# installing dependencies for go (goose, linter, releaser)
+make install-deps
+# apply sql migrations
+make migrations-up
+# start api server
+make run
+# start frontend
+make run-ui
+```

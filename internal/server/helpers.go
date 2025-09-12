@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func respondStatus(w http.ResponseWriter, code int) {
@@ -78,6 +79,10 @@ func queryOr[T any](r *http.Request, key string, bo T) T {
 	case uint64:
 		if uintVal, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return any(uintVal).(T)
+		}
+	case time.Time:
+		if dateVal, err := time.Parse(time.RFC3339, val); err == nil {
+			return any(dateVal).(T)
 		}
 	}
 

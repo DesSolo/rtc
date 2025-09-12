@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 
 	"rtc/internal/storage"
@@ -62,6 +63,41 @@ func (s *Storage) CreateProject(ctx context.Context, project *storage.Project) e
 		}
 
 		return fmt.Errorf("row.Scan: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateProject ...
+func (s *Storage) UpdateProject(ctx context.Context, project *storage.Project) error {
+	query := queryBuilder().Update("projects").
+		Where(squirrel.Eq{"id": project.ID})
+
+	if project.Name != "" {
+		query = query.Set("name", project.Name)
+	}
+
+	if project.Description != "" {
+		query = query.Set("description", project.Description)
+	}
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return fmt.Errorf("query: %w", err)
+	}
+
+	if _, err := s.manager.Conn(ctx).Exec(ctx, sql, args...); err != nil {
+		return fmt.Errorf("pool.Exec: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteProject ...
+func (s *Storage) DeleteProject(ctx context.Context, ID uint64) error {
+	query := "DELETE FROM projects WHERE id = $1"
+	if _, err := s.manager.Conn(ctx).Exec(ctx, query, ID); err != nil {
+		return fmt.Errorf("pool.Exec: %w", err)
 	}
 
 	return nil

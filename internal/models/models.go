@@ -79,6 +79,14 @@ const (
 	AuditActionUnknown AuditAction = ""
 	// AuditActionConfigUpdated ...
 	AuditActionConfigUpdated AuditAction = "config_updated"
+	// AuditActionProjectCreated ...
+	AuditActionProjectCreated AuditAction = "project_created"
+	// AuditActionProjectUpdated ...
+	AuditActionProjectUpdated AuditAction = "project_updated"
+	// AuditActionProjectDeleted ...
+	AuditActionProjectDeleted AuditAction = "project_deleted"
+	// AuditActionReleaseDeleted ...
+	AuditActionReleaseDeleted AuditAction = "release_deleted"
 )
 
 // Audit log record for history
@@ -87,6 +95,14 @@ type Audit struct {
 	Actor   string
 	Payload []byte
 	Ts      time.Time
+}
+
+// AuditFilter ...
+type AuditFilter struct {
+	Action   AuditAction
+	Actor    string
+	FromDate time.Time
+	ToDate   time.Time
 }
 
 // User ...

@@ -106,3 +106,94 @@ func encodeAuditRecordConfigUpdated(actor string, record *auditRecordConfigUpdat
 		Payload: data,
 	}, nil
 }
+
+func encodeAuditRecordProjectCreated(actor string, projectName, description string) (*storage.Audit, error) {
+	type payloadV1 struct {
+		Version     string `json:"version"`
+		Project     string `json:"project"`
+		Description string `json:"description"`
+	}
+
+	data, err := json.Marshal(payloadV1{
+		Version:     "v1",
+		Project:     projectName,
+		Description: description,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("json.Marshal: %w", err)
+	}
+	return &storage.Audit{
+		Action:  string(models.AuditActionProjectCreated),
+		Actor:   actor,
+		Payload: data,
+	}, nil
+}
+
+func encodeAuditRecordProjectUpdated(actor string, projectName, oldDescription, newDescription string) (*storage.Audit, error) {
+	type payloadV1 struct {
+		Version        string `json:"version"`
+		Project        string `json:"project"`
+		OldDescription string `json:"old_description"`
+		NewDescription string `json:"new_description"`
+	}
+
+	data, err := json.Marshal(payloadV1{
+		Version:        "v1",
+		Project:        projectName,
+		OldDescription: oldDescription,
+		NewDescription: newDescription,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("json.Marshal: %w", err)
+	}
+	return &storage.Audit{
+		Action:  string(models.AuditActionProjectUpdated),
+		Actor:   actor,
+		Payload: data,
+	}, nil
+}
+
+func encodeAuditRecordProjectDeled(actor string, projectName string) (*storage.Audit, error) {
+	type payloadV1 struct {
+		Version string `json:"version"`
+		Project string `json:"project"`
+	}
+
+	data, err := json.Marshal(payloadV1{
+		Version: "v1",
+		Project: projectName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("json.Marshal: %w", err)
+	}
+	return &storage.Audit{
+		Action:  string(models.AuditActionProjectDeleted),
+		Actor:   actor,
+		Payload: data,
+	}, nil
+}
+
+func encodeAuditRecordReleaseDeleted(actor string, projectName, envName, releaseName string) (*storage.Audit, error) {
+	type payloadV1 struct {
+		Version string `json:"version"`
+		Project string `json:"project"`
+		Env     string `json:"env"`
+		Release string `json:"release"`
+	}
+
+	data, err := json.Marshal(payloadV1{
+		Version: "v1",
+		Project: projectName,
+		Env:     envName,
+		Release: releaseName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("json.Marshal: %w", err)
+	}
+
+	return &storage.Audit{
+		Action:  string(models.AuditActionReleaseDeleted),
+		Actor:   actor,
+		Payload: data,
+	}, nil
+}

@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 
 	"rtc/internal/provider"
 )
@@ -55,6 +58,10 @@ func (r createProjectRequest) Validate() error {
 		return fmt.Errorf("description is required")
 	}
 
+	if strings.Contains(r.Name, "/") {
+		return fmt.Errorf("name is invalid")
+	}
+
 	return nil
 }
 
@@ -87,4 +94,52 @@ func (s *Server) handleCreateProject(w http.ResponseWriter, r *http.Request) {
 	respondData(ctx, w, http.StatusCreated, createProjectResponse{
 		Project: convertModelToProject(newProject),
 	})
+}
+
+type updateProjectRequest struct {
+	Description string `json:"description"`
+}
+
+func (s *Server) handleUpdateProject(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	projectName := chi.URLParam(r, "projectName")
+
+	var req updateProjectRequest
+	if err := bindJSON(r, &req); err != nil {
+		slog.ErrorContext(ctx, "bindJSON", "err", err)
+		respondError(ctx, w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := s.provider.UpdateProjectDescription(ctx, projectName, req.Description); err != nil {
+		if errors.Is(err, provider.ErrNotFound) {
+			respondError(ctx, w, http.StatusNotFound, err.Error())
+			return
+		}
+		slog.ErrorContext(ctx, "provider.UpdateProjectDescription", "err", err)
+		respondError(ctx, w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondStatus(w, http.StatusNoContent)
+}
+
+func (s *Server) handleDeleteProject(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	projectName := chi.URLParam(r, "projectName")
+
+	if err := s.provider.DeleteProject(ctx, projectName); err != nil {
+		if errors.Is(err, provider.ErrNotFound) {
+			respondError(ctx, w, http.StatusNotFound, err.Error())
+			return
+		}
+
+		slog.ErrorContext(ctx, "provider.DeleteProject", "err", err)
+		respondError(ctx, w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondStatus(w, http.StatusNoContent)
 }

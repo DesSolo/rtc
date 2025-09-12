@@ -27,11 +27,16 @@ const (
 	shutdownTimeout = time.Second * 5
 )
 
+var (
+	defaultAuthorizer = auth.NewNoop()
+)
+
 // Server HTTP server
 type Server struct {
-	provider *provider.Provider
-	jwt      *auth.JWT
-	auth     map[string]auth.Authenticator
+	provider   *provider.Provider
+	jwt        *auth.JWT
+	auth       map[string]auth.Authenticator
+	authorizer auth.Authorizer
 
 	address           string
 	readHeaderTimeout time.Duration
@@ -46,6 +51,7 @@ func NewServer(provider *provider.Provider, jwt *auth.JWT, options ...OptionFunc
 		auth: map[string]auth.Authenticator{
 			"jwt": jwt,
 		},
+		authorizer:        defaultAuthorizer,
 		address:           defaultAddress,
 		readHeaderTimeout: defaultReadHeaderTimeout,
 		mux:               chi.NewRouter(),
@@ -104,9 +110,12 @@ func (s *Server) initRoutes() {
 
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.Authenticate(s.auth))
+			r.Use(middlewares.Authorize(s.authorizer))
 
 			r.Get("/projects", s.handleListProjects)
 			r.Post("/projects", s.handleCreateProject)
+			r.Put("/projects/{projectName}", s.handleUpdateProject)
+			r.Delete("/projects/{projectName}", s.handleDeleteProject)
 
 			r.Get("/projects/{projectName}/envs", s.handleListEnvironments)
 
@@ -119,11 +128,14 @@ func (s *Server) initRoutes() {
 			r.Post("/projects/{projectName}/envs/{envName}/releases/{releaseName}/configs", s.handleUpsertConfigs)
 
 			r.Get("/audits", s.handleListAudits)
+			r.Get("/audits/actions", s.handleAuditActions)
 
 			r.Get("/users", s.handleListUsers)
 			r.Post("/users", s.handleCreateUser)
 			r.Patch("/users/{username}", s.handleUpdateUser)
 		})
+
+		r.Get("/health", s.handleHealth)
 	})
 }
 

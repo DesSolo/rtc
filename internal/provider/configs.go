@@ -28,7 +28,7 @@ func (p *Provider) Configs(ctx context.Context, projectName, envName, releaseNam
 
 	values, err := p.valuesStorage.ValuesByPath(ctx, formatValuesStoragePath(projectName, envName, releaseName))
 	if err != nil {
-		return nil, fmt.Errorf("valuesStorage.Values: %w", err)
+		return nil, fmt.Errorf("valuesStorage.ValuesByPath: %w", err)
 	}
 
 	return convertConfigsToModel(configs, values), nil

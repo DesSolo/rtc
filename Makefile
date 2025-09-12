@@ -11,6 +11,11 @@ CONFIG_FILE_PATH=examples/config.yaml
 run:
 	CONFIG_FILE_PATH=${CONFIG_FILE_PATH} go run ${MAIN_FILE_PATH}
 
+FRONTEND_PATH=frontend/ui
+
+run-ui:
+	cd ${FRONTEND_PATH} && npm run dev
+
 LOCAL_BIN := $(CURDIR)/bin
 
 LINT_VERSION := 2.3.1
@@ -60,7 +65,7 @@ clear-release:
 	rm -rf ${RELEASE_DIRECTORY}
 
 build-ui:
-	cd frontend/ui && npm run build
+	cd cd ${FRONTEND_PATH} && npm run build
 
 build-server: build-ui
 	go build -o ${RELEASE_DIRECTORY}/${PROJECT_NAME} ${MAIN_FILE_PATH}
