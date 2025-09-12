@@ -19,7 +19,7 @@ func FromContext(ctx context.Context) *Payload {
 	return payload
 }
 
-// UsernameFromContext ...
+// UsernameFromContext returns a username from context
 func UsernameFromContext(ctx context.Context) string {
 	payload := FromContext(ctx)
 	if payload == nil {

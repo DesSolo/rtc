@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/open-policy-agent/opa/v1/rego"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"rtc/internal/auth"
@@ -30,6 +32,7 @@ type container struct {
 	valuesStorage storage.ValuesStorage
 	provider      *provider.Provider
 	jwtAuth       *auth.JWT
+	authorizer    auth.Authorizer
 	server        *server.Server
 }
 
@@ -141,6 +144,31 @@ func (c *container) JWTAuth() *auth.JWT {
 	return c.jwtAuth
 }
 
+func (c *container) Authorizer() auth.Authorizer {
+	if c.authorizer == nil {
+		options := c.Config().Server.Authorizer
+
+		switch options.Kind {
+		case "rego":
+			policy, err := rego.New(
+				rego.Query(options.Rego.Query),
+				rego.Load([]string{options.Rego.PolicyPath}, nil),
+			).PrepareForEval(context.Background())
+			if err != nil {
+				fatal("failed to load OPA policy:", err)
+			}
+
+			c.authorizer = auth.NewRego(&policy)
+		case "noop":
+			c.authorizer = auth.NewNoop()
+		default:
+			fatal(options.Kind, errors.New("unknown authorizer"))
+		}
+	}
+
+	return c.authorizer
+}
+
 func (c *container) Server() *server.Server {
 	if c.server == nil {
 		options := c.Config().Server
@@ -148,6 +176,7 @@ func (c *container) Server() *server.Server {
 		c.server = server.NewServer(c.Provider(), c.JWTAuth(),
 			server.WithAddress(options.Address),
 			server.WithReadHeaderTimeout(options.ReadHeaderTimeout),
+			server.WithAuthorizer(c.Authorizer()),
 			loadServerAuth(c),
 		)
 	}

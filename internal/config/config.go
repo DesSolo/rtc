@@ -27,6 +27,13 @@ type Config struct {
 				Roles    []string `yaml:"roles"`
 			} `yaml:"tokens"`
 		} `yaml:"auth"`
+		Authorizer struct {
+			Kind string `yaml:"kind"`
+			Rego struct {
+				Query      string `yaml:"query"`
+				PolicyPath string `yaml:"policy_path"`
+			} `yaml:"rego"`
+		} `yaml:"authorizer"`
 	} `yaml:"server"`
 	Storage struct {
 		DSN string `yaml:"dsn"`

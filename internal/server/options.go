@@ -34,3 +34,10 @@ func WithAuth(authenticators map[string]auth.Authenticator) OptionFunc {
 		s.auth = authenticators
 	}
 }
+
+// WithAuthorizer ...
+func WithAuthorizer(authorizer auth.Authorizer) OptionFunc {
+	return func(s *Server) {
+		s.authorizer = authorizer
+	}
+}
