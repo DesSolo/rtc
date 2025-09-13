@@ -4,6 +4,10 @@ draft: false
 title: ''
 ---
 
+# Welcome to RTC documentation
+
+Explore the following sections to learn how to use RTC:
+
 {{< cards >}}
   {{< card link="basic_usage" title="Basic Usage" icon="document-text" >}}
   {{< card link="configuration" title="Configuration reference" icon="adjustments" >}}

@@ -4,6 +4,8 @@ module:
   imports:
     - path: github.com/imfing/hextra
 
+enableGitInfo: true
+
 menu:
   main:
     - name: Documentation
@@ -18,3 +20,11 @@ menu:
       url: "https://github.com/DesSolo/rtc"
       params:
         icon: github
+
+params:
+  theme:
+    default: dark
+  displayUpdatedDate: true
+  footer:
+    displayPoweredBy: false
+  repoContent: https://raw.githubusercontent.com/DesSolo/rtc/refs/heads/master
