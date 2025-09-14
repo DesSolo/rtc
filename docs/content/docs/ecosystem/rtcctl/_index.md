@@ -2,6 +2,7 @@
 date: '2025-09-14T21:33:12+03:00'
 draft: false
 title: 'rtcctl'
+weight: 2
 ---
 
 `rtcctl` is a command-line interface (CLI) tool designed to manage your RTC server installation via its API. It's perfect for automation scripts, CI/CD pipelines, and quick administrative tasks.
