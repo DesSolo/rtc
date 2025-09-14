@@ -1,6 +1,6 @@
 ---
 date: '2025-09-14T21:55:37+03:00'
-draft: true
+draft: false
 title: 'config'
 ---
 

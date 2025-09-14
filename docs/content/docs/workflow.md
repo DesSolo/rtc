@@ -1,6 +1,6 @@
 ---
 date: '2025-09-14T22:31:26+03:00'
-draft: true
+draft: false
 title: 'Workflow'
 weight: 3
 ---
