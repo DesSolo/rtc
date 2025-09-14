@@ -9,7 +9,6 @@ RTC provides a robust platform to manage your application configurations in real
 - **Dynamic Configuration Updates:** Modify configurations on the fly and have your applications react instantly.
 - **Centralized Management:** A single source of truth for all your application settings across different environments.
 - **Environment-Specific Configurations:** Easily manage configurations tailored for development, staging, and production environments.
-- **Version Control for Configurations:** Track changes to your configurations, revert to previous versions, and maintain an audit trail.
 - **User Management & Audit Logs:** Securely manage users and monitor all configuration changes with detailed audit logs.
 
 ## ⚠️ Important Note on Configuration Size
