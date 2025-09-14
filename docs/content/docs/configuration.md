@@ -1,13 +1,11 @@
 ---
 date: '2025-09-12T20:15:36+03:00'
 draft: false
-title: 'Configuration Reference'
+title: 'Configuration reference'
 weight: 3
 ---
 
 Actual configuration file in [examples](https://github.com/DesSolo/rtc/blob/master/examples/config.yaml)
-
-
 
 ## logging
 
@@ -47,6 +45,8 @@ read_header_timeout: 3s
 ```
 
 ### auth
+
+More info about [auth]({{< ref "auth" >}})
 
 Authentication configuration using JWT and static tokens.
 

@@ -27,4 +27,10 @@ params:
   displayUpdatedDate: true
   footer:
     displayPoweredBy: false
-  repoContent: https://raw.githubusercontent.com/DesSolo/rtc/refs/heads/master
+
+markup:
+  highlight:
+    noClasses: false
+  goldmark:
+    renderer:
+      unsafe: true

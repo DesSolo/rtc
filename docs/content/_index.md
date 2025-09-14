@@ -1,45 +1,40 @@
 ---
-date: '2025-09-12T21:17:19+03:00'
-draft: false
-title: ''
+title: Home
+layout: hextra-home
 ---
+<div class="hx:mt-6 hx:mb-6">
+{{< hextra/hero-headline >}}
+  Solution for dynamic&nbsp;<br class="hx:sm:block hx:hidden" /> configuration management.
+{{< /hextra/hero-headline >}}
+</div>
 
-# RTC
+<div class="hx:mb-12">
+{{< hextra/hero-subtitle >}}
+  RTC provides a robust platform to manage your application configurations in real-time, &nbsp;<br class="hx:sm:block hx:hidden" />allowing for seamless updates and deployments without service interruptions.
+{{< /hextra/hero-subtitle >}}
+</div>
 
-Welcome to RTC, your solution for dynamic and efficient configuration management! 🎉
+<div class="hx:mb-6">
+{{< hextra/hero-button text="Get Started" link="docs" >}}
+</div>
 
-RTC provides a robust platform to manage your application configurations in real-time, allowing for seamless updates and deployments without service interruptions.
+<div class="hx:mt-6"></div>
 
-## ✨ Key Features
-- **Dynamic Configuration Updates:** Modify configurations on the fly and have your applications react instantly.
-- **Centralized Management:** A single source of truth for all your application settings across different environments.
-- **Environment-Specific Configurations:** Easily manage configurations tailored for development, staging, and production environments.
-- **Version Control for Configurations:** Track changes to your configurations, revert to previous versions, and maintain an audit trail.
-- **User Management & Audit Logs:** Securely manage users and monitor all configuration changes with detailed audit logs.
-
-## Principal diagram
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant RTC
-    participant DB
-    participant etcd
-    actor Client_Code
-
-    Note over User, etcd: Configuration recording process
-    User->>RTC: Sending key and value
-    RTC->>DB: Saving a key with metadata
-    RTC->>etcd: Saving a key with value
-    etcd-->>RTC: Confirmation of entry
-    DB-->>RTC: Confirmation of entry
-    RTC-->>User: Successful update
-
-    Note over Client_Code, etcd: Configuration reading process
-    Client_Code->>etcd: Query value by key
-    etcd-->>Client_Code: Return value
-
-```
-
-> [!WARNING]
-> Currently, each configuration is limited to **128 keys**. This limitation is due to the underlying `etcd` storage. We are actively exploring solutions to overcome this, but for now, please keep your configurations concise.
+{{< hextra/feature-grid >}}
+    {{< hextra/feature-card
+    title="Dynamic Configuration Updates"
+    subtitle="Modify configurations on the fly and have your applications react instantly."
+    >}}
+    {{< hextra/feature-card
+    title="Centralized Management"
+    subtitle="A single source of truth for all your application settings across different environments."
+    >}}
+    {{< hextra/feature-card
+    title="Environment-Specific Configurations"
+    subtitle="Easily manage configurations tailored for development, staging, and production environments."
+    >}}
+    {{< hextra/feature-card
+    title="User Management & Audit Logs"
+    subtitle="Securely manage users and monitor all configuration changes with detailed audit logs."
+    >}}
+{{< /hextra/feature-grid >}}
