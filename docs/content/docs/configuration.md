@@ -1,13 +1,11 @@
 ---
 date: '2025-09-12T20:15:36+03:00'
 draft: false
-title: 'Configuration Reference'
+title: 'Configuration reference'
 weight: 3
 ---
 
 Actual configuration file in [examples](https://github.com/DesSolo/rtc/blob/master/examples/config.yaml)
-
-
 
 ## logging
 
@@ -48,6 +46,8 @@ read_header_timeout: 3s
 
 ### auth
 
+More info about [auth]({{< ref "auth" >}})
+
 Authentication configuration using JWT and static tokens.
 
 #### jwt
@@ -55,6 +55,10 @@ Authentication configuration using JWT and static tokens.
 JWT authentication using RSA256 asymmetric cryptography.
 
 ##### private_key
+
+{{< callout type="warning" >}}
+This parameter is sensitive
+{{< /callout >}}
 
 RSA private key for token signing (PEM format).
 
@@ -85,6 +89,10 @@ ttl: 24h
 ```
 
 #### tokens
+
+{{< callout type="warning" >}}
+This parameter is sensitive
+{{< /callout >}}
 
 Static token authentication with role-based access.
 
@@ -130,6 +138,10 @@ policy_path: examples/authz.rego
 ```
 
 ## storage
+
+{{< callout type="warning" >}}
+This parameter is sensitive
+{{< /callout >}}
 
 PostgreSQL database connection configuration.
 

@@ -2,6 +2,7 @@
 date: '2025-09-12T20:13:11+03:00'
 draft: false
 title: 'Authorization'
+weight: 1
 ---
 
 The RTC server supports multiple authorization methods to fit different needs:

@@ -16,6 +16,11 @@ FRONTEND_PATH=frontend/ui
 run-ui:
 	cd ${FRONTEND_PATH} && npm run dev
 
+DOCS_PATH=docs
+
+run-doc:
+	cd ${DOCS_PATH} && hugo server --buildDrafts --disableFastRender
+
 LOCAL_BIN := $(CURDIR)/bin
 
 LINT_VERSION := 2.3.1

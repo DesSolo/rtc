@@ -2,6 +2,7 @@
 date: '2025-09-12T21:21:56+03:00'
 draft: false
 title: 'Rego'
+weight: 2
 ---
 
 The RTC server supports authorization using [Rego](https://www.openpolicyagent.org/docs/policy-language) policies, the language used by the Open Policy Agent (OPA). This gives you fine-grained control over who can do what within the system.
