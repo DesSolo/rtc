@@ -3,11 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"path"
-	"strconv"
 	"time"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"rtc/pkg/rtc"
 	"rtc/pkg/rtc/loader"
@@ -18,59 +14,27 @@ const (
 	amountKey = rtc.Key("amount")
 )
 
-var (
-	etcdAddresses = []string{"127.0.0.1:2379"}
-)
-
-const (
-	project = "example"
-	env     = "prod"
-	release = "latest"
-)
-
 func main() {
-	go setValue()
-	go getValue()
-
-	time.Sleep(5 * time.Second)
-}
-
-func getValue() {
-	c, err := etcd.NewProvider(etcdAddresses, project, env, release)
+	c, err := etcd.NewProvider([]string{"127.0.0.1:2379"}, "example", "dev", "latest")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("new provider err: %s", err.Error())
 	}
 
 	loader.SetDefault(c)
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	for range ticker.C {
-		amount := loader.Get(context.Background(), amountKey).Int()
-		log.Printf("amount: %d", amount)
-	}
-}
+	amount := loader.Get(ctx, amountKey).Int()
+	log.Printf("amount: %d", amount)
 
-func setValue() {
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints: etcdAddresses,
+	watchErr := loader.WatchValue(ctx, amountKey, func(oldValue, newValue rtc.Value) {
+		log.Printf("old value: %s, new value: %s", oldValue.String(), newValue.String())
 	})
-	if err != nil {
-		log.Fatal(err)
+
+	if watchErr != nil {
+		log.Fatalf("watch err: %s", watchErr.Error())
 	}
 
-	keyPath := path.Join("rtc", project, env, release, string(amountKey))
-
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	var item int
-
-	for range ticker.C {
-		if _, err := client.Put(context.Background(), keyPath, strconv.Itoa(item)); err != nil {
-			log.Fatal(err)
-		}
-		item++
-	}
+	<-ctx.Done()
 }

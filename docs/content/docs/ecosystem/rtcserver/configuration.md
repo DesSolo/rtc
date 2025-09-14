@@ -2,7 +2,7 @@
 date: '2025-09-12T20:15:36+03:00'
 draft: false
 title: 'Configuration reference'
-weight: 3
+weight: 2
 ---
 
 Actual configuration file in [examples](https://github.com/DesSolo/rtc/blob/master/examples/config.yaml)

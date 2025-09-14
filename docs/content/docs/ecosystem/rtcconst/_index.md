@@ -2,6 +2,7 @@
 date: '2025-09-14T21:54:04+03:00'
 draft: false
 title: 'rtcconst'
+weight: 3
 ---
 
 `rtcconst` is a CLI utility designed to help developers by automatically generating typed constants (e.g., for the Go programming language) from your configuration YAML files. This ensures type safety and prevents typos when accessing config values in your code.
