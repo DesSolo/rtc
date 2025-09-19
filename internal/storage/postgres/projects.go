@@ -8,7 +8,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 // Projects ...

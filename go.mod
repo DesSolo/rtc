@@ -1,4 +1,4 @@
-module rtc
+module github.com/DesSolo/rtc
 
 go 1.24.6
 

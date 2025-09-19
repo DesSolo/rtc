@@ -8,9 +8,9 @@ import (
 
 	"github.com/samber/lo"
 
-	"rtc/internal/auth"
-	"rtc/internal/models"
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 // Configs ...

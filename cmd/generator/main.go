@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"rtc/internal/generator"
-	"rtc/internal/generator/parser"
+	"github.com/DesSolo/rtc/internal/generator"
+	"github.com/DesSolo/rtc/internal/generator/parser"
 )
 
 var (

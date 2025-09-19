@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"rtc/internal/models"
-	"rtc/internal/provider"
+	"github.com/DesSolo/rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/provider"
 )
 
 type loginRequest struct {

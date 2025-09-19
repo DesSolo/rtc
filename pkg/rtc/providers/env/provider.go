@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/internal"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/internal"
 )
 
 // Provider ...

@@ -5,9 +5,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/internal"
-	"rtc/pkg/rtc/providers/file"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/internal"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/file"
 )
 
 // SimpleYAML ...

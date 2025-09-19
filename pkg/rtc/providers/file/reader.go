@@ -1,6 +1,6 @@
 package file
 
-import "rtc/pkg/rtc"
+import "github.com/DesSolo/rtc/pkg/rtc"
 
 // Reader ...
 type Reader interface {

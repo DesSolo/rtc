@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"rtc/internal/models"
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 func Test_Configs_ExpectOk(t *testing.T) {

@@ -3,7 +3,7 @@ package ctl
 import (
 	"context"
 
-	"rtc/internal/ctl/client"
+	"github.com/DesSolo/rtc/internal/ctl/client"
 )
 
 type contextKeyClient struct{}

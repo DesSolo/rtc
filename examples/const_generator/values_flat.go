@@ -2,7 +2,7 @@
 package config
 
 import (
-	"rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc"
 )
 
 const (

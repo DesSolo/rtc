@@ -89,3 +89,6 @@ release:
 
 try-release:
 	${LOCAL_BIN}/goreleaser release --snapshot --clean
+
+test:
+	go test -v ./...

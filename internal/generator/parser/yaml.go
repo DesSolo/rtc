@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"rtc/internal/generator"
+	"github.com/DesSolo/rtc/internal/generator"
 )
 
 type node map[string]any

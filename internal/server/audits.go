@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/models"
 )
 
 type audit struct {

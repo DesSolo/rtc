@@ -14,10 +14,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	assets "rtc"
-	"rtc/internal/auth"
-	"rtc/internal/provider"
-	"rtc/internal/server/middlewares"
+	assets "github.com/DesSolo/rtc"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/provider"
+	"github.com/DesSolo/rtc/internal/server/middlewares"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"os"
 
-	"rtc/internal/auth"
-	"rtc/internal/server"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/server"
 )
 
 func configureLogger(di *container) {

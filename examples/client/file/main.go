@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/providers/file"
-	"rtc/pkg/rtc/providers/file/readers"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/file"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/file/readers"
 )
 
 const (

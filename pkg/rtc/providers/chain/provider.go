@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc"
 )
 
 // Provider ...

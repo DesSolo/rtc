@@ -6,7 +6,7 @@ package mocks
 
 import (
 	"context"
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/storage"
 
 	mock "github.com/stretchr/testify/mock"
 )

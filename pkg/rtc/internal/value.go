@@ -3,7 +3,7 @@ package internal
 import (
 	"strconv"
 
-	"rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc"
 )
 
 // Value implementation rtc.Value from bytes

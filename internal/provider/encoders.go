@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"rtc/internal/models"
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 type metadataV1 struct {

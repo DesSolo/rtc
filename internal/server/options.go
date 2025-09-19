@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/auth"
 )
 
 // OptionFunc ...

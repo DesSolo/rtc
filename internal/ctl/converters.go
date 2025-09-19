@@ -1,6 +1,6 @@
 package ctl
 
-import "rtc/internal/ctl/client"
+import "github.com/DesSolo/rtc/internal/ctl/client"
 
 func convertConfigsToReq(configs upsertConfigYaml) []*client.UpsertConfigRequest {
 	result := make([]*client.UpsertConfigRequest, 0, len(configs))

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"rtc/internal/auth"
-	"rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/models"
 )
 
 func convertModelsToProjects(projects []*models.Project) []project {
