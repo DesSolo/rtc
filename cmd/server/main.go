@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"rtc/internal/app"
-	"rtc/pkg/closer"
+	"github.com/DesSolo/rtc/internal/app"
+	"github.com/DesSolo/rtc/pkg/closer"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/models"
 )
 
 // AuditsSearch ...

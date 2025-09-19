@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/auth"
 )
 
 // Authorize ...

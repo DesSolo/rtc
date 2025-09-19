@@ -9,7 +9,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc"
 )
 
 // Provider ...

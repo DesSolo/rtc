@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	"rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/auth"
 
 	mock "github.com/stretchr/testify/mock"
 )

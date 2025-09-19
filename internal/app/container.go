@@ -12,14 +12,14 @@ import (
 	"github.com/open-policy-agent/opa/v1/rego"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"rtc/internal/auth"
-	"rtc/internal/config"
-	"rtc/internal/provider"
-	"rtc/internal/server"
-	"rtc/internal/storage"
-	"rtc/internal/storage/etcd"
-	"rtc/internal/storage/postgres"
-	"rtc/pkg/closer"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/config"
+	"github.com/DesSolo/rtc/internal/provider"
+	"github.com/DesSolo/rtc/internal/server"
+	"github.com/DesSolo/rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/storage/etcd"
+	"github.com/DesSolo/rtc/internal/storage/postgres"
+	"github.com/DesSolo/rtc/pkg/closer"
 )
 
 const (

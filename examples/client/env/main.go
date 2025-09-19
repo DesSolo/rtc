@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/loader"
-	"rtc/pkg/rtc/providers/env"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/loader"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/env"
 )
 
 const (

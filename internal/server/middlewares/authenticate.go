@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/auth"
 )
 
 // Authenticate ...

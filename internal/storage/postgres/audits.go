@@ -6,7 +6,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 // AuditsSearch ...

@@ -1,6 +1,6 @@
 package provider
 
-import "rtc/internal/storage"
+import "github.com/DesSolo/rtc/internal/storage"
 
 // Provider ...
 type Provider struct {

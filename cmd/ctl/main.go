@@ -1,6 +1,6 @@
 package main
 
-import "rtc/internal/ctl"
+import "github.com/DesSolo/rtc/internal/ctl"
 
 func main() {
 	ctl.Execute()

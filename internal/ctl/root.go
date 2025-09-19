@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"rtc/internal/ctl/client"
+	"github.com/DesSolo/rtc/internal/ctl/client"
 )
 
 // Execute ...

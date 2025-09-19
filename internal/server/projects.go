@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"rtc/internal/provider"
+	"github.com/DesSolo/rtc/internal/provider"
 )
 
 type project struct {

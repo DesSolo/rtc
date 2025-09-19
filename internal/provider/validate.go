@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/models"
 )
 
 var valueTypesValidators = map[models.ValueType]func(string) error{

@@ -6,9 +6,9 @@ import (
 	"os"
 	"sync"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/internal"
-	"rtc/pkg/rtc/providers/env"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/internal"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/env"
 )
 
 var (

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"rtc/pkg/rtc"
-	"rtc/pkg/rtc/loader"
-	"rtc/pkg/rtc/providers/etcd"
+	"github.com/DesSolo/rtc/pkg/rtc"
+	"github.com/DesSolo/rtc/pkg/rtc/loader"
+	"github.com/DesSolo/rtc/pkg/rtc/providers/etcd"
 )
 
 const (

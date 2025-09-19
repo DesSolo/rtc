@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"rtc/internal/auth"
-	"rtc/internal/models"
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/auth"
+	"github.com/DesSolo/rtc/internal/models"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 // Projects ...

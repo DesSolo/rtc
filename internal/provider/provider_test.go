@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"rtc/internal/storage/mocks"
+	"github.com/DesSolo/rtc/internal/storage/mocks"
 )
 
 type mk struct {

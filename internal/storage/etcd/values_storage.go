@@ -7,7 +7,7 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"rtc/internal/storage"
+	"github.com/DesSolo/rtc/internal/storage"
 )
 
 const (
